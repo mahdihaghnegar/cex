@@ -1,0 +1,19 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch server",
+      ///"skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/server/server.js",
+      "env": {
+        "ATLAS_URI": "mongodb+srv://mahdihaghnegar:ZWvnD6opKbI6KPW7@cluster0.ueoiorp.mongodb.net/employees?retryWrites=true&w=majority&appName=Cluster0",
+        "PORT": "5050"
+      }
+    }
+  ]
+}
