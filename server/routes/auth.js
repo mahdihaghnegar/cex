@@ -48,8 +48,8 @@ routerAuth.post("/", async (req, res) => {
   //else res.send(result).status(200);
 
   // If found, compare the hashed passwords and generate the JWT token for the user
-  //const jwtSecretKey = process.env.JWTSecretKey || "";
-  const jwtSecretKey = "dsfdsfsdfdsvcsvdfgefg";
+  const jwtSecretKey = process.env.JWTSecretKey || "";
+  //const jwtSecretKey = "dsfdsfsdfdsvcsvdfgefg";
   try {
     if (user === null) {
       bcrypt.hash(password, 10, async function (_err, hash) {
@@ -72,8 +72,9 @@ routerAuth.post("/", async (req, res) => {
         const token = jwt.sign(loginData, jwtSecretKey);
         res.status(200).json({ message: "success", token });
       });
-    } else if (user.length === 1) {
-      bcrypt.compare(password, user[0].password, function (_err, result) {
+    } //if (user.length === 1)
+    else {
+      bcrypt.compare(password, user.password, function (_err, result) {
         if (!result) {
           return res.status(401).json({ message: "Invalid password" });
         } else {
@@ -83,6 +84,7 @@ routerAuth.post("/", async (req, res) => {
           };
 
           const token = jwt.sign(loginData, jwtSecretKey);
+          //console.log({ message: "success", token });
           res.status(200).json({ message: "success", token });
         }
       });
