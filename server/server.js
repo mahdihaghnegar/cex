@@ -3,6 +3,8 @@ import cors from "cors";
 //import records from "./routes/record.js";
 import users from "./routes/user.js";
 import auths from "./routes/auth.js";
+import verifys from "./routes/verify.js";
+import checkAccounts from "./routes/check-account.js";
 
 const PORT = process.env.PORT || 5050;
 const app = express();
@@ -16,6 +18,15 @@ app.use(cors(corsOptions));
 //app.use("/record", records);
 app.use("/user", users);
 app.use("/auth", auths);
+app.use("/verify", verifys);
+app.use("/checkAccount", checkAccounts);
+
+// Basic home route for the API
+app.get("/", (_req, res) => {
+  res.send(
+    "Auth API.\nPlease use POST /auth & POST /verify for authentication"
+  );
+});
 
 // start the Express server
 app.listen(PORT, () => {
