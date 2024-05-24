@@ -36,6 +36,62 @@ const Login = (props) => {
     }
 
     // Authentication calls will be made here...
+
+    // Check if email has an account associated with it
+    checkAccountExists((accountExists) => {
+      // If yes, log in
+      if (accountExists) logIn();
+      // Else, ask user if they want to create a new account and if yes, then log in
+      else if (
+        window.confirm(
+          "An account does not exist with this email address: " +
+            email +
+            ". Do you want to create a new account?"
+        )
+      ) {
+        logIn();
+      }
+    });
+  };
+
+  // Call the server API to check if the given email ID already exists
+  const checkAccountExists = (callback) => {
+    fetch("http://localhost:5050/check-account", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    })
+      .then((r) => r.json())
+      .then((r) => {
+        callback(r?.userExists);
+      });
+  };
+
+  // Log in a user using email and password
+  const logIn = () => {
+    fetch("http://localhost:5050/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((r) => r.json())
+      .then((r) => {
+        if ("success" === r.message) {
+          localStorage.setItem(
+            "user",
+            JSON.stringify({ email, token: r.token })
+          );
+          props.setLoggedIn(true);
+          props.setEmail(email);
+          navigate("/");
+        } else {
+          window.alert("Wrong email or password");
+        }
+      });
   };
 
   return (
