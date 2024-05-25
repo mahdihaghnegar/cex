@@ -14,6 +14,13 @@
         "ATLAS_URI": "mongodb+srv://mahdihaghnegar:ZWvnD6opKbI6KPW7@cluster0.ueoiorp.mongodb.net/employees?retryWrites=true&w=majority&appName=Cluster0",
         "PORT": "5050"
       }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch frontend",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend"
     }
   ]
 }
