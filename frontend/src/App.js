@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
+  const [address, setAdddres] = useState("");
   useEffect(() => {
     // Fetch the user email and token from local storage
     const user = JSON.parse(localStorage.getItem("user"));
@@ -28,6 +29,7 @@ function App() {
       .then((r) => {
         setLoggedIn("success" === r.message);
         setEmail(user.email || "");
+        setAdddres(user.address || "");
       });
   }, []);
 
@@ -40,6 +42,7 @@ function App() {
             element={
               <Home
                 email={email}
+                address={address}
                 loggedIn={loggedIn}
                 setLoggedIn={setLoggedIn}
               />
@@ -47,7 +50,13 @@ function App() {
           />
           <Route
             path="/login"
-            element={<Login setLoggedIn={setLoggedIn} setEmail={setEmail} />}
+            element={
+              <Login
+                setLoggedIn={setLoggedIn}
+                setEmail={setEmail}
+                setAdddres={setAdddres}
+              />
+            }
           />
         </Routes>
       </BrowserRouter>

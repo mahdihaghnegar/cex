@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 // This will help us connect to the database
 import db from "../db/connection.js";
+import Web3 from "web3";
 
 // This help convert the id from string to ObjectId for the _id.
 //import { ObjectId } from "mongodb";
@@ -29,6 +30,22 @@ const routerAuth = express.Router();
     res.status(500).send("Error adding record");
   }
 });*/
+
+// Set up the RPC connection to Test-BNB
+const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
+
+// Create a new Ethereum wallet
+async function createWallet() {
+  const web3Provider = new Web3.providers.HttpProvider(rpcUrl);
+  const web3 = new Web3(web3Provider);
+  //console.log("f");
+  const wallet = web3.eth.accounts.create();
+  console.log(`New wallet address: ${wallet.address}`);
+  /*web3.eth.getBlockNumber().then((result) => {
+    console.log("Latest Ethereum Block is ", result);
+  });*/
+  return wallet;
+}
 
 routerAuth.post("/", async (req, res) => {
   const { email, password } = req.body;
@@ -56,9 +73,11 @@ routerAuth.post("/", async (req, res) => {
         console.log({ email, password: hash });
         //db.get("users").push({ email, password: hash }).write();
 
+        const wallet = await createWallet();
         let newUser = {
           email: req.body.email,
           password: hash,
+          address: wallet.address,
         };
 
         let result = await collection.insertOne(newUser);
@@ -85,7 +104,9 @@ routerAuth.post("/", async (req, res) => {
 
           const token = jwt.sign(loginData, JWTSecretKey);
           //console.log({ message: "success", token });
-          res.status(200).json({ message: "success", token });
+          res
+            .status(200)
+            .json({ message: "success", token, address: user.address });
         }
       });
       // If no user is found, hash the given password and create a new entry in the auth db with the email and hashed password

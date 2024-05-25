@@ -91,6 +91,7 @@ const Login = (props) => {
           );
           props.setLoggedIn(true);
           props.setEmail(email);
+          props.setAddress(r.address);
           navigate("/");
         } else {
           window.alert("Wrong email or password");

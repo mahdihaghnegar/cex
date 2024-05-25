@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const Home = (props) => {
-  const { loggedIn, email } = props;
+  const { loggedIn, email, address } = props;
   const navigate = useNavigate();
 
   const onButtonClick = () => {
@@ -27,7 +27,15 @@ const Home = (props) => {
           onClick={onButtonClick}
           value={loggedIn ? "Log out" : "Log in"}
         />
-        {loggedIn ? <div>Your email address is {email}</div> : <div />}
+        {loggedIn ? (
+          <div>
+            Your email address is {email}
+            <br />
+            Your ether address is {address}
+          </div>
+        ) : (
+          <div />
+        )}
       </div>
     </div>
   );
