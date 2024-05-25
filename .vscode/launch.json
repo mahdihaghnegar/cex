@@ -15,11 +15,11 @@
         "PORT": "5050"
       }
     },
-    {
+    {// first : npm start then press f5 and use this to debug
       "type": "chrome",
       "request": "launch",
       "name": "Launch frontend",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:3000",// port must be 3000
       "webRoot": "${workspaceFolder}/frontend"
     }
   ]

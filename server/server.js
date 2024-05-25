@@ -11,7 +11,7 @@ const app = express();
 
 // middleware
 const corsOptions = {
-  origin: "http://127.0.0.1:3000", //"https://mern-fe-6cdm.onrender.com", // "http://127.0.0.1:5173", // frontend URI (ReactJS)
+  origin: "http://localhost:3000", //"https://mern-fe-6cdm.onrender.com", // "http://127.0.0.1:5173", // frontend URI (ReactJS)
 };
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -19,7 +19,7 @@ app.use(cors(corsOptions));
 app.use("/user", users);
 app.use("/auth", auths);
 app.use("/verify", verifys);
-app.use("/checkAccount", checkAccounts);
+app.use("/check-account", checkAccounts);
 
 // Basic home route for the API
 app.get("/", (_req, res) => {

@@ -48,8 +48,8 @@ routerAuth.post("/", async (req, res) => {
   //else res.send(result).status(200);
 
   // If found, compare the hashed passwords and generate the JWT token for the user
-  const jwtSecretKey = process.env.JWTSecretKey || "";
-  //const jwtSecretKey = "dsfdsfsdfdsvcsvdfgefg";
+  //const JWTSecretKey = process.env.JWTSecretKey || "";
+  const JWTSecretKey = "dsfdsfsdfdsvcsvdfgefg";
   try {
     if (user === null) {
       bcrypt.hash(password, 10, async function (_err, hash) {
@@ -69,7 +69,7 @@ routerAuth.post("/", async (req, res) => {
           signInTime: Date.now(),
         };
 
-        const token = jwt.sign(loginData, jwtSecretKey);
+        const token = jwt.sign(loginData, JWTSecretKey);
         res.status(200).json({ message: "success", token });
       });
     } //if (user.length === 1)
@@ -83,7 +83,7 @@ routerAuth.post("/", async (req, res) => {
             signInTime: Date.now(),
           };
 
-          const token = jwt.sign(loginData, jwtSecretKey);
+          const token = jwt.sign(loginData, JWTSecretKey);
           //console.log({ message: "success", token });
           res.status(200).json({ message: "success", token });
         }

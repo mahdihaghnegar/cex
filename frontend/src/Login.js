@@ -56,17 +56,21 @@ const Login = (props) => {
 
   // Call the server API to check if the given email ID already exists
   const checkAccountExists = (callback) => {
-    fetch("http://localhost:5050/check-account", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    })
-      .then((r) => r.json())
-      .then((r) => {
-        callback(r?.userExists);
-      });
+    try {
+      fetch("http://localhost:5050/check-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          callback(r?.userExists);
+        });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // Log in a user using email and password

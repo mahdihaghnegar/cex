@@ -13,20 +13,24 @@ const checkAccount = express.Router();
 
 // The verify endpoint that checks if a given JWT token is valid
 checkAccount.post("/", async (req, res) => {
-  const { email } = req.body;
+  let user = null;
+  try {
+    const { email } = req.body;
 
-  console.log(req.body);
+    console.log(req.body);
 
-  // const user = db
-  //   .get('users')
-  //   .value()
-  //   .filter((user) => email === user.email)
-  let collection = await db.collection("users");
+    // const user = db
+    //   .get('users')
+    //   .value()
+    //   .filter((user) => email === user.email)
+    let collection = await db.collection("users");
 
-  let user = await collection.findOne({ email });
+    user = await collection.findOne({ email });
 
-  console.log(user);
-
+    console.log(user);
+  } catch (error) {
+    console.error(error);
+  }
   res.status(200).json({
     status: user !== null ? "User exists" : "User does not exist",
     userExists: user !== null,
