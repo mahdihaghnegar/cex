@@ -89,7 +89,9 @@ routerAuth.post("/", async (req, res) => {
         };
 
         const token = jwt.sign(loginData, JWTSecretKey);
-        res.status(200).json({ message: "success", token });
+        res
+          .status(200)
+          .json({ message: "success", token, address: wallet.address });
       });
     } //if (user.length === 1)
     else {

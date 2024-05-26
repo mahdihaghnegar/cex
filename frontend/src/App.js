@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
-  const [address, setAdddres] = useState("");
+  const [address, setAddress] = useState("");
   useEffect(() => {
     // Fetch the user email and token from local storage
     const user = JSON.parse(localStorage.getItem("user"));
@@ -29,7 +29,7 @@ function App() {
       .then((r) => {
         setLoggedIn("success" === r.message);
         setEmail(user.email || "");
-        setAdddres(user.address || "");
+        setAddress(user.address || "");
       });
   }, []);
 
@@ -54,7 +54,7 @@ function App() {
               <Login
                 setLoggedIn={setLoggedIn}
                 setEmail={setEmail}
-                setAdddres={setAdddres}
+                setAddress={setAddress}
               />
             }
           />

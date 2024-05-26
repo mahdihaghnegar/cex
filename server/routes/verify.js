@@ -14,9 +14,11 @@ const routerVerify = express.Router();
 routerVerify.post("/", (req, res) => {
   const tokenHeaderKey = "jwt-token";
   const authToken = req.headers[tokenHeaderKey];
-  const jwtSecretKey = process.env.JWTSecretKey || "";
+  //const JWTSecretKey = process.env.JWTSecretKey || "";
+  const JWTSecretKey = "dsfdsfsdfdsvcsvdfgefg";
+
   try {
-    const verified = jwt.verify(authToken, jwtSecretKey);
+    const verified = jwt.verify(authToken, JWTSecretKey);
     if (verified) {
       return res.status(200).json({ status: "logged in", message: "success" });
     } else {
