@@ -8,6 +8,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const serverURL = "https://cex-sr.onrender.com"; //http://localhost:5050
   useEffect(() => {
     // Fetch the user email and token from local storage
     const user = JSON.parse(localStorage.getItem("user"));
@@ -19,7 +20,7 @@ function App() {
     }
 
     // If the token exists, verify it with the auth server to see if it is valid
-    fetch("http://localhost:5050/verify", {
+    fetch(`${serverURL}/verify`, {
       method: "POST",
       headers: {
         "jwt-token": user.token,

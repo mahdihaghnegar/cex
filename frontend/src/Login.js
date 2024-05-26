@@ -6,7 +6,7 @@ const Login = (props) => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
+  const serverURL = "https://cex-sr.onrender.com"; //http://localhost:5050
   const navigate = useNavigate();
 
   const onButtonClick = () => {
@@ -57,7 +57,7 @@ const Login = (props) => {
   // Call the server API to check if the given email ID already exists
   const checkAccountExists = (callback) => {
     try {
-      fetch("http://localhost:5050/check-account", {
+      fetch(`${serverURL}/check-account`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ const Login = (props) => {
 
   // Log in a user using email and password
   const logIn = () => {
-    fetch("http://localhost:5050/auth", {
+    fetch(`${serverURL}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
