@@ -6,7 +6,7 @@ const Login = (props) => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const serverURL = "https://cex-sr.onrender.com"; //http://localhost:5050
+  const serverURL = "http://localhost:5050"; // "https://cex-sr.onrender.com"; //http://localhost:5050
   const navigate = useNavigate();
 
   const onButtonClick = () => {
@@ -118,6 +118,7 @@ const Login = (props) => {
       <div className={"inputContainer"}>
         <input
           value={password}
+          type="password"
           placeholder="Enter your password here"
           onChange={(ev) => setPassword(ev.target.value)}
           className={"inputBox"}

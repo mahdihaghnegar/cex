@@ -1,8 +1,9 @@
-import React from "react";
+import { React, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Home = (props) => {
-  const { loggedIn, email, address } = props;
+  const { loggedIn, email, address, serverURL } = props;
+  const [balance, setBalance] = useState(0);
   const navigate = useNavigate();
 
   const onButtonClick = () => {
@@ -11,6 +12,37 @@ const Home = (props) => {
       props.setLoggedIn(false);
     } else {
       navigate("/login");
+    }
+  };
+  const checkEmailBalance = () => {
+    try {
+      fetch(`${serverURL}/balance`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          console.log(r);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const onUpdateDepositClick = () => {
+    if (loggedIn) {
+      // setBalance(1);
+      //fetch balance
+
+      // Fetch the user email and token from local storage
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      // Call the server API to check if the given email ID already exists
+      checkEmailBalance();
+    } else {
+      setBalance(0);
     }
   };
 
@@ -32,6 +64,14 @@ const Home = (props) => {
             Your email address is {email}
             <br />
             Your ether address is {address}
+            <br />
+            <input
+              className={"inputButton"}
+              type="button"
+              onClick={onUpdateDepositClick}
+              value="Update Deposite"
+            />
+            <br /> Your ether Balance is {balance}
           </div>
         ) : (
           <div />
