@@ -14,15 +14,17 @@ const routerBalance = express.Router();
 
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 async function getBalance(address) {
+  let balanceInEther;
   try {
     const web3Provider = new Web3.providers.HttpProvider(rpcUrl);
     const web3 = new Web3(web3Provider);
     const balance = await web3.eth.getBalance(address);
-    const balanceInEther = web3.utils.fromWei(balance, "ether");
+    balanceInEther = web3.utils.fromWei(balance, "ether");
     console.log(`Balance of address ${address}: ${balanceInEther} ETH`);
   } catch (error) {
     console.error("Error fetching balance:", error);
   }
+  return balanceInEther;
 }
 
 // Set up the RPC connection to Test-BNB
@@ -39,9 +41,9 @@ routerBalance.post("/", async (req, res) => {
     if (user === null) {
       return res.status(401).json({ status: "invalid user", message: "error" });
     } else {
-      await getBalance(user.address);
+      const balance = await getBalance(user.address);
 
-      res.status(200).json({ message: "success", balance: user.balance });
+      res.status(200).json({ message: "success", balance: balance });
     }
   } catch (err) {
     console.error({ err });

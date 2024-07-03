@@ -25,7 +25,12 @@ const Home = (props) => {
       })
         .then((r) => r.json())
         .then((r) => {
-          console.log(r);
+          if ("success" === r.message) {
+            console.log(r.balance);
+            setBalance(r.balance);
+          } else {
+            window.alert("Wrong fetch balance");
+          }
         });
     } catch (error) {
       console.error(error);
@@ -37,7 +42,7 @@ const Home = (props) => {
       //fetch balance
 
       // Fetch the user email and token from local storage
-      const user = JSON.parse(localStorage.getItem("user"));
+      //const user = JSON.parse(localStorage.getItem("user"));
 
       // Call the server API to check if the given email ID already exists
       checkEmailBalance();
