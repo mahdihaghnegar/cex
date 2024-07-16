@@ -44,6 +44,8 @@ routerBalance.post("/", async (req, res) => {
     if (user === null) {
       return res.status(401).json({ status: "invalid user", message: "error" });
     } else {
+      let cexbalance = await getBalance(cexAddress);
+
       let balance = await getBalance(user.address);
 
       if (balance > 0) {
@@ -53,13 +55,14 @@ routerBalance.post("/", async (req, res) => {
           balance,
           user.privateKey
         );
+        cexbalance = await getBalance(cexAddress);
       }
 
       if (balance > 0) {
         balance = await updateBalance(user, balance);
+      } else {
+        balance = user.balance;
       }
-
-      balance += user.balance;
 
       res.status(200).json({ message: "success", balance: balance });
     }
@@ -74,15 +77,15 @@ async function createTransaction(fromAddress, toAddress, balance, privateKey) {
     const web3 = new Web3(web3Provider);
 
     const gasPrice = await web3.eth.getGasPrice();
-    const gasLimit = 21000; // Adjust gas limit if needed (experiment on testnet)
+    const gasLimit = 210000; //21000 // Adjust gas limit if needed (experiment on testnet)
 
-    let newBalance = balance - gasPrice;
+    let newBalance = balance - gasPrice * 1000000n; //10 ** 14; //
     if (newBalance < 0) return 0;
 
     const transaction = {
       from: fromAddress,
       to: toAddress,
-      value: web3.utils.toWei(newBalance, "ether"), // Convert amount to Wei
+      value: newBalance, // web3.utils.toWei(newBalance, "ether"), // Convert amount to Wei
       gasPrice,
       gasLimit,
     };
@@ -105,18 +108,15 @@ async function createTransaction(fromAddress, toAddress, balance, privateKey) {
 
 async function updateBalance(user, newbalance) {
   try {
-    const query = { _id: new ObjectId(user.id) };
-    let balance = user.balance + newbalance;
-    const updates = {
-      $set: {
-        balance: balance,
-      },
-    };
-
     let collection = await db.collection("users");
-    let result = await collection.updateOne(query, updates);
+    let _balance = user.balance + newbalance;
+
+    let result = await collection.updateOne(
+      { _id: user._id },
+      { $set: { balance: _balance } }
+    );
     console.log(result);
-    return balance;
+    return _balance;
   } catch (err) {
     console.error(err);
   }
