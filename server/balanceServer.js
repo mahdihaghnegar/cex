@@ -1,11 +1,7 @@
-import express from "express";
+// This will help us connect to the database
+import db from "./db/connection.js";
 
-import loopUpdate from "../balanceServer.js";
-
-// router is an instance of the express router.
-// We use it to define our routes.
-// The router will be added as a middleware and will take control of requests starting with path /record.
-const routerBalance = express.Router();
+import Web3 from "web3";
 
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
@@ -13,81 +9,76 @@ const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 // Set up the RPC connection to Test-BNB
 const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 
-routerBalance.post("/", async (req, res) => {
-  const { email } = req.body;
-  const successBalance = await loopUpdate(email);
-  if (successBalance < 0) {
-    return res.status(401).json({ status: "invalid user", message: "error" });
+async function loopUpdate(email) {
+  let collection = await db.collection("users");
+
+  if (email === null) {
+    const users = await collection.find({});
+    users.forEach((user) => {
+      checkUser(collection, user.email);
+    });
+  } else {
+    return checkUser(collection, email);
   }
+  return -10;
+}
 
-  return res
-    .status(200)
-    .json({ message: "success", balance: successBalance.toString() });
-});
-
-/*let collection = await db.collection("users");
-
+async function checkUser(collection, email) {
   let user = await collection.findOne({ email });
-  if (user === null) {
-    return res.status(401).json({ status: "invalid user", message: "error" });
-  }
 
-  let errorAccured = true;
+  if (user === null) return -1;
 
-  let successBalance = 0;
+  console.log("----- Balance: ", user.balance);
 
+  let changedBalance = false;
   getBalance(user.address).then(
     (balance) => {
-      errorAccured = false;
-      console.log("user balance", balance);
+      console.log("user " + user.email + " get balance " + balance);
       let mul = 1;
       let reapeetTX = true;
       while (reapeetTX && balance > mul) {
         createTransaction(user, balance, cexAddress, mul).then(
           (newbalance) => {
             reapeetTX = false;
-            errorAccured = false;
-            console.log("transferd balance", newbalance);
+            console.log(
+              "user " + user.email + " transferd balance",
+              newbalance
+            );
             updateBalance(collection, user, newbalance).then(
               (bal) => {
-                successBalance = bal;
-                errorAccured = false;
-                / * new
-                const balstring = bal.toString();
-                return res
-                  .status(200)
-                  .json({ message: "success", balance: balstring }); * /
+                console.log(
+                  "user " + user.email + " updates db balance to",
+                  bal
+                );
+                changedBalance = true;
               },
               (err) => {
                 console.error("update balance:", err);
-                errorAccured = true;
               }
             );
           },
           (errr) => {
             console.error("tx:", errr);
-            errorAccured = true;
           }
         );
-        //console.log("mul: ", mul);
-        mul *= 10;
+        // console.log("mul: ", mul);
+        mul *= 2;
       }
     },
     (er) => {
       console.error("get balance:", er);
-      errorAccured = true;
     }
   );
 
-  if (errorAccured) {
-    successBalance = user.balance;
+  if (changedBalance) {
+    let userBal = await collection.findOne({ email });
+    console.log("!!!!! new Balance: ", userBal.balance);
+    return userBal.balance;
   } else {
-    console.log("success");
+    console.log("last Balance: ", user.balance);
+    return user.balance;
   }
-  return res
-    .status(200)
-    .json({ message: "success", balance: successBalance.toString() });
-});
+}
 
 async function getBalance(address) {
   return new Promise(async function (resolve, reject) {
@@ -180,6 +171,5 @@ async function updateBalance(collection, user, newbalance) {
     }
   });
 }
-  */
 
-export default routerBalance;
+export default loopUpdate;

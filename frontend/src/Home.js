@@ -1,10 +1,23 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Home = (props) => {
   const { loggedIn, email, address, serverURL } = props;
   const [balance, setBalance] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      try {
+        if (loggedIn && email !== null) checkEmailBalance();
+      } catch {
+        console.log("connection error");
+      }
+    }, 3000); // Call every 3 seconds (30000 milliseconds)
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
 
   const onButtonClick = () => {
     if (loggedIn) {
@@ -69,13 +82,13 @@ const Home = (props) => {
             Your email address is {email}
             <br />
             Your ether address is {address}
-            {/* <br />
+            <br />
             <input
               className={"inputButton"}
               type="button"
               onClick={onUpdateDepositClick}
               value="Update Deposite"
-            /> */}
+            />
             <br /> Your holesky ether Balance in database is {balance}
           </div>
         ) : (
