@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = (props) => {
+  const { serverURL } = props;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const serverURL = "http://localhost:5050"; // "https://cex-sr.onrender.com"; //http://localhost:5050
+
   const navigate = useNavigate();
 
   const onButtonClick = () => {

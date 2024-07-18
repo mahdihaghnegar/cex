@@ -57,6 +57,7 @@ function App() {
                 setLoggedIn={setLoggedIn}
                 setEmail={setEmail}
                 setAddress={setAddress}
+                serverURL={serverURL}
               />
             }
           />
