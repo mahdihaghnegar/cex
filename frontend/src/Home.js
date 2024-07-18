@@ -69,14 +69,14 @@ const Home = (props) => {
             Your email address is {email}
             <br />
             Your ether address is {address}
-            <br />
+            {/* <br />
             <input
               className={"inputButton"}
               type="button"
               onClick={onUpdateDepositClick}
               value="Update Deposite"
-            />
-            <br /> Your ether Balance is {balance}
+            /> */}
+            <br /> Your holesky ether Balance in database is {balance}
           </div>
         ) : (
           <div />

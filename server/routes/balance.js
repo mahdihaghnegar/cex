@@ -17,6 +17,51 @@ const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 // Set up the RPC connection to Test-BNB
 const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 
+async function loopUpdate() {
+  let collection = await db.collection("users");
+
+  const users = await collection.find({});
+  users.forEach((user) => {
+    getBalance(user.address).then(
+      (balance) => {
+        console.log("user " + user.email + " get balance " + balance);
+        let mul = 1;
+        let reapeetTX = true;
+        while (reapeetTX && balance > mul) {
+          createTransaction(user, balance, cexAddress, mul).then(
+            (newbalance) => {
+              reapeetTX = false;
+              console.log(
+                "user " + user.email + " transferd balance",
+                newbalance
+              );
+              updateBalance(collection, user, newbalance).then(
+                (bal) => {
+                  console.log(
+                    "user " + user.email + " updates db balance to",
+                    bal
+                  );
+                },
+                (err) => {
+                  console.error("update balance:", err);
+                }
+              );
+            },
+            (errr) => {
+              console.error("tx:", errr);
+            }
+          );
+          // console.log("mul: ", mul);
+          mul *= 2;
+        }
+      },
+      (er) => {
+        console.error("get balance:", er);
+      }
+    );
+  });
+}
+
 routerBalance.post("/", async (req, res) => {
   const { email } = req.body;
 
@@ -27,13 +72,13 @@ routerBalance.post("/", async (req, res) => {
     return res.status(401).json({ status: "invalid user", message: "error" });
   }
 
-  let error = true;
+  let errorAccured = true;
 
   let successBalance = 0;
 
   getBalance(user.address).then(
     (balance) => {
-      error = false;
+      errorAccured = false;
       console.log("user balance", balance);
       let mul = 1;
       let reapeetTX = true;
@@ -41,12 +86,12 @@ routerBalance.post("/", async (req, res) => {
         createTransaction(user, balance, cexAddress, mul).then(
           (newbalance) => {
             reapeetTX = false;
-            error = false;
+            errorAccured = false;
             console.log("transferd balance", newbalance);
             updateBalance(collection, user, newbalance).then(
               (bal) => {
                 successBalance = bal;
-                error = false;
+                errorAccured = false;
                 /*new
                 const balstring = bal.toString();
                 return res
@@ -55,26 +100,26 @@ routerBalance.post("/", async (req, res) => {
               },
               (err) => {
                 console.error("update balance:", err);
-                error = true;
+                errorAccured = true;
               }
             );
           },
           (errr) => {
             console.error("tx:", errr);
-            error = true;
+            errorAccured = true;
           }
         );
-        console.log("mul: ", mul);
+        //console.log("mul: ", mul);
         mul *= 10;
       }
     },
     (er) => {
       console.error("get balance:", er);
-      error = true;
+      errorAccured = true;
     }
   );
 
-  if (error) {
+  if (errorAccured) {
     successBalance = user.balance;
   } else {
     console.log("success");
@@ -129,6 +174,7 @@ function createTransaction(user, balance, toAddress, mul) {
           )
         );
       } else {
+        console.log("accepted mul: " + mul + " newBalance: " + newBalance);
         const transaction = {
           from: user.address,
           to: toAddress,
@@ -157,7 +203,7 @@ function createTransaction(user, balance, toAddress, mul) {
 
 async function updateBalance(collection, user, newbalance) {
   return new Promise(async function (resolve, reject) {
-    if (newbalance == 0) reject(new Error("zero balance"));
+    if (newbalance === 0) reject(new Error("zero balance"));
     try {
       // let collection = await db.collection("users");
       let _balance = BigInt(user.balance) + newbalance;
@@ -175,4 +221,4 @@ async function updateBalance(collection, user, newbalance) {
   });
 }
 
-export default routerBalance;
+export default loopUpdate; //routerBalance;
