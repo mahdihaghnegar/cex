@@ -8,11 +8,49 @@ import Web3 from "web3";
 const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 // Set up the RPC connection to Test-BNB
 const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
+const web3Provider = new Web3.providers.HttpProvider(rpcUrl);
+const web3 = new Web3(web3Provider);
 
 async function loopUpdate(email) {
   let collection = await db.collection("users");
+  let user = await collection.findOne({ email });
+  let changedBalance = false;
+  if (user === null) return -1;
 
-  if (email === null) {
+  getBalance(user.address).then(
+    (balance) => {
+      createTransaction(user, balance, cexAddress, null).then(
+        (newbalance) => {
+          console.log("user " + user.email + " transferd balance", newbalance);
+          updateBalance(collection, user, newbalance).then(
+            (bal) => {
+              console.log("user " + user.email + " updates db balance to", bal);
+              changedBalance = true;
+            },
+            (err) => {
+              console.error("update balance:", err);
+            }
+          );
+        },
+        (errr) => {
+          console.error("tx:", errr);
+        }
+      );
+    },
+    (er) => {
+      console.error("get balance:", er);
+    }
+  );
+  if (changedBalance) {
+    let userBal = await collection.findOne({ email });
+    console.log("!!!!! new Balance: ", userBal.balance.toString());
+    return userBal.balance;
+  } else {
+    console.log("last Balance: ", user.balance.toString());
+    return user.balance;
+  }
+}
+/*if (email === null) {
     const users = await collection.find({});
     users.forEach((user) => {
       checkUser(collection, user.email);
@@ -20,6 +58,7 @@ async function loopUpdate(email) {
   } else {
     return checkUser(collection, email);
   }
+
   return -10;
 }
 
@@ -79,13 +118,12 @@ async function checkUser(collection, email) {
     return user.balance;
   }
 }
-
+*/
 async function getBalance(address) {
   return new Promise(async function (resolve, reject) {
     try {
       let balance = 0;
-      const web3Provider = new Web3.providers.HttpProvider(rpcUrl);
-      const web3 = new Web3(web3Provider);
+
       balance = await web3.eth.getBalance(address);
 
       if (balance > 0) {
@@ -103,29 +141,39 @@ async function getBalance(address) {
   });
 }
 
+async function estimateGasFee(fromAddress, toAddress, value) {
+  const gasEstimate = await web3.eth.estimateGas({
+    from: fromAddress,
+    to: toAddress,
+    value: value,
+  });
+  return gasEstimate;
+}
+
 function createTransaction(user, balance, toAddress, mul) {
   return new Promise(async function (resolve, reject) {
     try {
-      const web3Provider = new Web3.providers.HttpProvider(rpcUrl);
-      const web3 = new Web3(web3Provider);
-
       const gasPrice = await web3.eth.getGasPrice();
-      const gasLimit = 210000; //21000 // Adjust gas limit if needed (experiment on testnet)
-
-      let newBalance = balance - gasPrice * BigInt(mul); //10 ** 14; //
+      const gasLimit = 21000; //21000 // Adjust gas limit if needed (experiment on testnet)
+      const gasEstimate = await estimateGasFee(
+        user.address,
+        toAddress,
+        balance
+      );
+      let newBalance = balance - gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
       if (newBalance < 0n) {
         reject(
           new Error(
             "less balance " +
               balance +
-              " for gasPrice " +
-              gasPrice +
+              " for gasEstimate " +
+              gasEstimate + //  gasPrice +
               " mul " +
               mul
           )
         );
       } else {
-        console.log("accepted mul: " + mul + " newBalance: " + newBalance);
+        //console.log("accepted mul: " + mul + " newBalance: " + newBalance);
         const transaction = {
           from: user.address,
           to: toAddress,

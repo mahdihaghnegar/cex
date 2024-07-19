@@ -23,9 +23,9 @@ app.use("/auth", auths);
 app.use("/verify", verifys);
 app.use("/check-account", checkAccounts);
 
-setInterval(() => {
+/*setInterval(() => {
   loopUpdate(null);
-}, 30000);
+}, 30000);*/
 
 // Basic home route for the API
 app.get("/", (_req, res) => {

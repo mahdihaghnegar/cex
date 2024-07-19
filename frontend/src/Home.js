@@ -6,7 +6,7 @@ const Home = (props) => {
   const [balance, setBalance] = useState(0);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  /* useEffect(() => {
     const intervalId = setInterval(() => {
       try {
         if (loggedIn && email !== null) checkEmailBalance();
@@ -18,7 +18,7 @@ const Home = (props) => {
     // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
-
+*/
   const onButtonClick = () => {
     if (loggedIn) {
       localStorage.removeItem("user");
@@ -27,6 +27,7 @@ const Home = (props) => {
       navigate("/login");
     }
   };
+
   const checkEmailBalance = () => {
     try {
       fetch(`${serverURL}/balance`, {
@@ -49,6 +50,7 @@ const Home = (props) => {
       console.error(error);
     }
   };
+
   const onUpdateDepositClick = () => {
     if (loggedIn) {
       // setBalance(1);
@@ -82,13 +84,13 @@ const Home = (props) => {
             Your email address is {email}
             <br />
             Your ether address is {address}
-            {/* <br />
+            <br />
             <input
               className={"inputButton"}
               type="button"
               onClick={onUpdateDepositClick}
               value="Update Deposite"
-            /> */}
+            />
             <br /> Your holesky ether Balance in database is {balance}
           </div>
         ) : (
