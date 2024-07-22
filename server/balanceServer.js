@@ -154,13 +154,13 @@ function createTransaction(user, balance, toAddress, mul) {
   return new Promise(async function (resolve, reject) {
     try {
       const gasPrice = await web3.eth.getGasPrice();
-      const gasLimit = 21000; //21000 // Adjust gas limit if needed (experiment on testnet)
-      const gasEstimate = await estimateGasFee(
+      const gasLimit = 21000n; // Adjust gas limit if needed (experiment on testnet)
+      /*const gasEstimate = await estimateGasFee(
         user.address,
         toAddress,
         balance
-      );
-      let newBalance = balance - gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
+      );*/
+      let newBalance = balance - gasPrice * gasLimit; //gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
       if (newBalance < 0n) {
         reject(
           new Error(
