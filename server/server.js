@@ -6,8 +6,9 @@ import auths from "./routes/auth.js";
 import verifys from "./routes/verify.js";
 import checkAccounts from "./routes/check-account.js";
 import balances from "./routes/balance.js";
-import loopUpdate from "./balanceServer.js";
-import balanceSubscription from "./balanceSubscription.js";
+//import loopUpdate from "./balanceServer.js";
+//import balanceSubscription from "./balanceSubscription.js";
+import balanceBlock from "./balanceBlock.js";
 
 const PORT = process.env.PORT || 5050;
 const app = express();
@@ -27,7 +28,11 @@ app.use("/check-account", checkAccounts);
 /*setInterval(() => {
   loopUpdate(null);
 }, 30000);*/
-balanceSubscription();
+//balanceSubscription();
+
+setInterval(() => {
+  balanceBlock();
+}, 130000); //10*13*1000ms
 
 // Basic home route for the API
 app.get("/", (_req, res) => {
