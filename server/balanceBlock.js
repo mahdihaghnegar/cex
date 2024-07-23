@@ -15,26 +15,33 @@ const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 const web3Provider = new Web3.providers.HttpProvider(rpcUrl); //http
 
 const web3 = new Web3(web3Provider);
-var lastBlockNumber = 0;
 
 async function balanceBlock() {
   let collection = await db.collection("users");
-  const lbn = await getLastBlockNumber();
-  await getBlockTransactions(1985586, collection);
-  /* if (lastBlockNumber < lbn - 10n) lastBlockNumber = lbn - 10n;
+  var lbn = await getLastBlockNumber();
+  const test = 1985586n; //test
+  lbn = test + 6n;
+  //await getBlockTransactions(1985586, collection);
+  // if (lastBlockNumber < lbn - 10n)
+  var lastBlockNumber = lbn - 10n;
   for (let i = lastBlockNumber; i < lbn - 5n; i++) {
-    console.log("block number:", i);
-    await getBlockTransactions(1985586, collection);
-  }*/
+    if (i === test) {
+      console.info("test block ", i);
+    }
+    console.log("check block number: ", i);
+    await getBlockTransactions(i, collection);
+    // await getBlockTransactions(1985586, collection);
+  }
 }
 
 async function getLastBlockNumber() {
   try {
     const blockNumber = await web3.eth.getBlockNumber();
-    console.log("Latest block number:", blockNumber);
+
+    console.log("Latest block number: ", blockNumber);
     return blockNumber;
   } catch (error) {
-    console.error("Error fetching block number:", error);
+    console.error("Error fetching block number: ", error);
   }
 }
 
@@ -46,26 +53,40 @@ async function getBlockTransactions(blockNumber, collection) {
       console.error("Block not found");
       return;
     }
-    console.log("Block: ", blockNumber);
+    console.log("Block details found: ", blockNumber);
 
     const transactions = block.transactions;
 
     // Process transactions here, e.g.,
-    // const test = "0xeCc6cBa35682ffC319F4862308a64Fe3679064CC".toLowerCase();
+    const test = "0xeCc6cBa35682ffC319F4862308a64Fe3679064CC".toLowerCase();
     for (const txHash of transactions) {
       // console.error("transaction ", txHash.to);
-      //if (txHash.to === test)
-      {
-        // console.error("transaction ", txHash.to);
-        let user = await findUserByAddress(txHash.to, collection);
-        if (user !== null) {
-          console.log("transaction to user: ", txHash.to);
-          /*console.log(
+      if (txHash.to === test) {
+        console.info("test transaction found ", txHash.to);
+      }
+      const user = await findUserByAddress(txHash.to, collection);
+      if (user !== null) {
+        console.log("transaction.to user is: ", txHash.to);
+        if (
+          user.lastBlockNumber == null ||
+          user.lastBlockNumber < blockNumber
+        ) {
+          // update
+          console.info("transfer value to CEX and update user");
+          await TransactToCEX(
+            user,
+            txHash.value,
+            cexAddress,
+            collection,
+            blockNumber
+          );
+        }
+
+        /*console.log(
             `Transaction from: ${txHash.from} to ${
               txHash.to
             } value ${txHash.value.toString()}`
           );*/
-        }
       }
     }
   } catch (error) {
@@ -83,7 +104,7 @@ async function findUserByAddress(address, collection) {
       //console.log("User found:", user);
       return user;
     } else {
-      console.error("No user found with address: ", address);
+      //console.error("No user found with address: ", address);
     }
   } catch (error) {
     console.error("Error finding user:", error);
@@ -92,42 +113,100 @@ async function findUserByAddress(address, collection) {
   return null;
 }
 
-async function findTx(block) {
-  try {
-    if (block !== null) {
-      console.log("block.number ", block.number);
-      return;
-      let collection = await db.collection("users");
-
-      block.transactions.forEach(async (transactionHash) => {
-        console.log("transactionHash ", transactionHash);
-        /*transaction = await web3.eth.getTransaction(transactionHash);
-        console.log("transaction ", transaction);
-
-        let user = await collection.findOne({ address: transaction.to });
-        if (
-          user !== null
-          // monitoredAddresses.includes(transaction.from) ||
-          //monitoredAddresses.includes(transaction.to)
-        ) {
-          console.log(
-            "Transaction found! Address:",
-            transaction.from,
-            "or",
-            transaction.to
-          );
-          // Add your notification logic here (e.g., send email, display alert)
-        }*/
-      });
+async function TransactToCEX(
+  user,
+  balance,
+  cexAddress,
+  collection,
+  blockNumber
+) {
+  let changedBalance = false;
+  createTransaction(user, balance, cexAddress, null).then(
+    (newbalance) => {
+      console.log("user " + user.email + " transferd balance", newbalance);
+      updateBalance(collection, user, newbalance, blockNumber).then(
+        (bal) => {
+          console.log("user " + user.email + " updates db balance to", bal);
+          changedBalance = true;
+        },
+        (err) => {
+          console.error("update balance:", err);
+        }
+      );
+    },
+    (errr) => {
+      console.error("tx:", errr);
     }
-  } catch (error) {
-    console.error("findTx ", error);
+  );
+
+  if (changedBalance) {
+    let userBal = await collection.findOne({ email });
+    console.log("!!!!! new Balance: ", userBal.balance.toString());
+    return userBal.balance;
+  } else {
+    console.log("last Balance: ", user.balance.toString());
+    return user.balance;
   }
 }
 
-// Event listener that logs any errors that occur
-function handleError(error) {
-  console.error(`Error receiving new blocks: ${error}`);
+function createTransaction(user, balance, toAddress, mul) {
+  return new Promise(async function (resolve, reject) {
+    try {
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = 21000n; // Adjust gas limit if needed (experiment on testnet)
+
+      let newBalance = balance - gasPrice * gasLimit; //gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
+      if (newBalance < 0n) {
+        reject(
+          new Error(
+            "less balance " + balance + " for gasEstimate " + gasEstimate //  gasPrice +
+          )
+        );
+      } else {
+        //console.log("accepted mul: " + mul + " newBalance: " + newBalance);
+        const transaction = {
+          from: user.address,
+          to: toAddress,
+          value: newBalance, // web3.utils.toWei(newBalance, "ether"), // Convert amount to Wei
+          gasPrice,
+          gasLimit,
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(
+          transaction,
+          user.privateKey
+        );
+        const txHash = await web3.eth.sendSignedTransaction(
+          signedTx.rawTransaction
+        );
+
+        console.log("Transaction created! Hash:", txHash);
+        resolve(newBalance);
+      }
+    } catch (error) {
+      //console.error("Error creating transaction:", error);
+      reject(new Error("Error creating transaction:", error));
+    }
+  });
 }
 
+async function updateBalance(collection, user, newbalance, blockNumber) {
+  return new Promise(async function (resolve, reject) {
+    if (newbalance === 0) reject(new Error("zero balance"));
+    try {
+      // let collection = await db.collection("users");
+      let _balance = BigInt(user.balance) + newbalance;
+
+      const result = await collection.updateOne(
+        { _id: user._id },
+        { $set: { balance: _balance, lastBlockNumber: blockNumber } }
+      );
+      console.log(result);
+      resolve(_balance);
+    } catch (err) {
+      console.error(err);
+      reject(new Error("error in update ", err));
+    }
+  });
+}
 export default balanceBlock;
