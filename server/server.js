@@ -32,7 +32,7 @@ app.use("/check-account", checkAccounts);
 
 setInterval(() => {
   balanceBlock();
-}, 5000); //5*13*1000ms
+}, 100000); //5*13*1000ms
 
 // Basic home route for the API
 app.get("/", (_req, res) => {

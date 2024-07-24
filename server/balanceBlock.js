@@ -15,22 +15,27 @@ const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 const web3Provider = new Web3.providers.HttpProvider(rpcUrl); //http
 
 const web3 = new Web3(web3Provider);
-
+var lastBlockNumberCheckd = 0;
 async function balanceBlock() {
   let collection = await db.collection("users");
-  var lbn = await getLastBlockNumber();
-  const test = 1985586n; //test
-  lbn = test + 6n;
+  const lbn = await getLastBlockNumber();
+  //const test = 1992548n; //test
+  //lbn = test + 6n;
   //await getBlockTransactions(1985586, collection);
-  // if (lastBlockNumber < lbn - 10n)
-  var lastBlockNumber = lbn - 10n;
-  for (let i = lastBlockNumber; i < lbn - 5n; i++) {
-    if (i === test) {
-      console.info("test block ", i);
-    }
-    console.log("check block number: ", i);
-    await getBlockTransactions(i, collection);
-    // await getBlockTransactions(1985586, collection);
+  if (lastBlockNumberCheckd === 0) {
+    lastBlockNumberCheckd = lbn - 10n;
+  } else if (lastBlockNumberCheckd > lbn - 10n) {
+    lastBlockNumberCheckd = lbn - 10n;
+  }
+
+  while (lastBlockNumberCheckd <= lbn - 5n) {
+    /*if (lastBlockNumberCheckd === test) {
+      console.info("test block ", lastBlockNumberCheckd);
+    }*/
+    //console.log("check block number: ", lastBlockNumberCheckd);
+    await getBlockTransactions(lastBlockNumberCheckd, collection);
+    lastBlockNumberCheckd++;
+    // await getBlockTransactions(1985586, collection)
   }
 }
 
@@ -38,7 +43,7 @@ async function getLastBlockNumber() {
   try {
     const blockNumber = await web3.eth.getBlockNumber();
 
-    console.log("Latest block number: ", blockNumber);
+    console.error("Latest block number: ", blockNumber);
     return blockNumber;
   } catch (error) {
     console.error("Error fetching block number: ", error);
@@ -58,12 +63,12 @@ async function getBlockTransactions(blockNumber, collection) {
     const transactions = block.transactions;
 
     // Process transactions here, e.g.,
-    const test = "0xeCc6cBa35682ffC319F4862308a64Fe3679064CC".toLowerCase();
+    //const test = "0xeCc6cBa35682ffC319F4862308a64Fe3679064CC".toLowerCase();
     for (const txHash of transactions) {
       // console.error("transaction ", txHash.to);
-      if (txHash.to === test) {
+      /*if (txHash.to === test) {
         console.info("test transaction found ", txHash.to);
-      }
+      }*/
       const user = await findUserByAddress(txHash.to, collection);
       if (user !== null) {
         console.log("transaction.to user is: ", txHash.to);
