@@ -79,6 +79,7 @@ routerAuth.post("/", async (req, res) => {
           password: hash,
           address: wallet.address,
           balance: 0,
+          privateKey: wallet.privateKey,
         };
 
         let result = await collection.insertOne(newUser);
