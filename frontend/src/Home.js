@@ -13,7 +13,7 @@ const Home = (props) => {
       } catch {
         console.log("connection error");
       }
-    }, 3000); // Call every 3 seconds (30000 milliseconds)
+    }, 5000); // Call every 3 seconds (30000 milliseconds)
 
     // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);

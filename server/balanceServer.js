@@ -14,7 +14,7 @@ const web3 = new Web3(web3Provider);
 async function loopUpdate(email) {
   let collection = await db.collection("users");
   let user = await collection.findOne({ email });
-  let changedBalance = false;
+  //let changedBalance = false;
   if (user === null) return -1;
   return user.balance;
   /*getBalance(user.address).then(
