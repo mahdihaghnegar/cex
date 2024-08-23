@@ -16,7 +16,7 @@ async function loopUpdate(email) {
   let user = await collection.findOne({ email });
   //let changedBalance = false;
   if (user === null) return -1;
-  return user.balance;
+  return user;
   /*getBalance(user.address).then(
     (balance) => {
       createTransaction(user, balance, cexAddress, null).then(

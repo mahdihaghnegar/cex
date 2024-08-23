@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 const Home = (props) => {
   const { loggedIn, email, address, serverURL } = props;
   const [balance, setBalance] = useState(0);
+  const [usdtBalance, setusdtBalance] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,7 +14,7 @@ const Home = (props) => {
       } catch {
         console.log("connection error");
       }
-    }, 5000); // Call every 3 seconds (30000 milliseconds)
+    }, 5000); // Call every 5 seconds (5000 milliseconds)
 
     // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);
@@ -42,6 +43,8 @@ const Home = (props) => {
           if ("success" === r.message) {
             console.log(r.balance);
             setBalance(r.balance);
+            console.log(r.usdt);
+            setusdtBalance(r.usdt);
           } else {
             window.alert("Wrong fetch balance");
           }
@@ -92,6 +95,7 @@ const Home = (props) => {
               value="Update Deposite"
             /> */}
             <br /> Your holesky ether Balance in database is {balance}
+            <br /> Your usdt Token Balance in database is {usdtBalance}
           </div>
         ) : (
           <div />

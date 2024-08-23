@@ -6,6 +6,9 @@ import Web3 from "web3";
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
 const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
+
+const usdtTokenAddress = "0xF23c254290a40b6a7744b7951cED14D76bE39881";
+
 // Set up the RPC connection to Test-BNB
 
 //const rpcUrl = "wss://holesky.infura.io/ws/v3/1777f3bd097440149132c56fd419752d";
@@ -18,10 +21,15 @@ const web3 = new Web3(web3Provider);
 var lastBlockNumberCheckd = 0;
 async function balanceBlock() {
   let collection = await db.collection("users");
-  const lbn = await getLastBlockNumber();
-  //const test = 1992548n; //test
-  //lbn = test + 6n;
-  //await getBlockTransactions(1985586, collection);
+  let lbn = await getLastBlockNumber();
+  {
+    //test
+    const test = 2184614n; //test
+    lbn = test + 6n; //test
+
+    await getBlockTransactions(test, collection); //test
+  } //test
+
   if (lastBlockNumberCheckd === 0) {
     lastBlockNumberCheckd = lbn - 10n;
   } else if (lastBlockNumberCheckd > lbn - 10n) {
@@ -69,29 +77,71 @@ async function getBlockTransactions(blockNumber, collection) {
       /*if (txHash.to === test) {
         console.info("test transaction found ", txHash.to);
       }*/
-      const user = await findUserByAddress(txHash.to, collection);
-      if (user !== null) {
-        console.log("transaction.to user is: ", txHash.to);
-        if (
-          user.lastBlockNumber == null ||
-          user.lastBlockNumber < blockNumber
-        ) {
-          // update
-          console.info("transfer value to CEX and update user");
-          await TransactToCEX(
-            user,
-            txHash.value,
-            cexAddress,
-            collection,
-            blockNumber
-          );
-        }
 
-        /*console.log(
+      if (
+        //find ERC20
+        txHash.input.substr(0, 10) == "0xa9059cbb" && //ERC20 Token
+        txHash.to.toLowerCase() === usdtTokenAddress.toLowerCase()
+      ) {
+        //console.error("transaction to usdt token ", usdtTokenAddress);
+        var receipt = await web3.eth.getTransactionReceipt(txHash.hash);
+
+        // Check if the receipt is an ERC-20 transfer
+        if (receipt.status === 1n && receipt.logs.length > 0) {
+          const log = receipt.logs.find((log) => {
+            return log.address.toLowerCase() === usdtTokenAddress.toLowerCase(); // Replace with the token address
+          });
+
+          if (log) {
+            // Extract the transfer details from the log
+            const transferDetails = {
+              from: log.topics[1],
+              to: log.topics[2],
+              value: web3.utils.fromWei(log.data, "wei"),
+            };
+            //find address to:
+            let userAddress =
+              "0x" + transferDetails.to.slice(-40).toLocaleLowerCase();
+            //console.log(userAddress);
+
+            // find user is in db
+            const user = await findUserByAddress(userAddress, collection);
+            if (user !== null) {
+              console.log("address of token.to user is: ", userAddress);
+
+              //transfer some ether to user,
+
+              //transfer token to CEX
+
+              //transfer remain ether to CEX
+            }
+          }
+        }
+      } else {
+        const user = await findUserByAddress(txHash.to, collection);
+        if (user !== null) {
+          console.log("transaction.to user is: ", txHash.to);
+          if (
+            user.lastBlockNumber == null ||
+            user.lastBlockNumber < blockNumber
+          ) {
+            // update
+            console.info("transfer value to CEX and update user");
+            await TransactToCEX(
+              user,
+              txHash.value,
+              cexAddress,
+              collection,
+              blockNumber
+            );
+          }
+
+          /*console.log(
             `Transaction from: ${txHash.from} to ${
               txHash.to
             } value ${txHash.value.toString()}`
           );*/
+        }
       }
     }
   } catch (error) {

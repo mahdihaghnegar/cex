@@ -15,7 +15,7 @@ const app = express();
 
 // middleware
 const corsOptions = {
-  origin: "https://cex-fr.onrender.com", // "http://localhost:3000", //
+  origin: "http://localhost:3000", // "https://cex-fr.onrender.com", //
 };
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -32,7 +32,7 @@ app.use("/check-account", checkAccounts);
 
 setInterval(() => {
   balanceBlock();
-}, 100000); //5*13*1000ms
+}, 10000); //5*13*1000ms= 100000
 
 // Basic home route for the API
 app.get("/", (_req, res) => {

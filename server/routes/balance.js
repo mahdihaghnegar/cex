@@ -9,20 +9,22 @@ const routerBalance = express.Router();
 
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
-const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
+//const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 // Set up the RPC connection to Test-BNB
-const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
+//const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 
 routerBalance.post("/", async (req, res) => {
   const { email } = req.body;
-  const successBalance = await loopUpdate(email);
-  if (successBalance < 0) {
+  const user = await loopUpdate(email);
+  if (user < 0) {
     return res.status(401).json({ status: "invalid user", message: "error" });
   }
 
-  return res
-    .status(200)
-    .json({ message: "success", balance: successBalance.toString() });
+  return res.status(200).json({
+    message: "success",
+    balance: user.balance.toString(),
+    usdt: user.usdt.toString(),
+  });
 });
 
 /*let collection = await db.collection("users");
