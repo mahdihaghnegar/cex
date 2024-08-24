@@ -6,7 +6,8 @@ import Web3 from "web3";
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
 const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
-
+const cexPR =
+  "910c0cea2a4f20d7cb5b1f51391e2b031ce977e73637f84516e0e0a0fbffa3bd";
 const usdtTokenAddress = "0xF23c254290a40b6a7744b7951cED14D76bE39881";
 
 // Set up the RPC connection to Test-BNB
@@ -110,6 +111,8 @@ async function getBlockTransactions(blockNumber, collection) {
               console.log("address of token.to user is: ", userAddress);
 
               //transfer some ether to user,
+              let res = await getETHTransactionToUser(user);
+              console.log(res);
 
               //transfer token to CEX
 
@@ -243,6 +246,40 @@ function createTransaction(user, balance, toAddress, mul) {
       reject(new Error("Error creating transaction:", error));
     }
   });
+}
+
+async function getETHTransactionToUser(user) {
+  // return new Promise(async function (resolve, reject) {
+  try {
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasLimit = 21000n; // Adjust gas limit if needed (experiment on testnet)
+
+    //console.log("accepted mul: " + mul + " newBalance: " + newBalance);
+    const transaction = {
+      from: cexAddress,
+      to: user.address,
+      value: web3.utils.toWei(10 ** 15, "wei"), // Convert amount to Wei
+      gasPrice,
+      gasLimit,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(
+      transaction,
+      cexPR
+    );
+    const txHash = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+
+    console.log("Transaction created! Hash:", txHash);
+    // resolve(newBalance);
+    return true;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    return false;
+    // reject(new Error("Error creating transaction:", error));
+  }
+  // });
 }
 
 async function updateBalance(collection, user, newbalance, blockNumber) {
