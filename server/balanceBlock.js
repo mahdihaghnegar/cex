@@ -2,13 +2,16 @@
 import db from "./db/connection.js";
 
 import Web3 from "web3";
+import contract from "./contract/Cexusdt.json" assert { type: "json" };
 
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
 const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 const cexPR =
   "910c0cea2a4f20d7cb5b1f51391e2b031ce977e73637f84516e0e0a0fbffa3bd";
-const usdtTokenAddress = "0xF23c254290a40b6a7744b7951cED14D76bE39881";
+//const usdtTokenAddress = "0xF23c254290a40b6a7744b7951cED14D76bE39881";
+const usdtTokenAddress = contract.address;
+const ERC20ABI = contract.abi;
 
 // Set up the RPC connection to Test-BNB
 
@@ -19,17 +22,19 @@ const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 const web3Provider = new Web3.providers.HttpProvider(rpcUrl); //http
 
 const web3 = new Web3(web3Provider);
+const tokenContract = new web3.eth.Contract(ERC20ABI, usdtTokenAddress);
+
 var lastBlockNumberCheckd = 0;
 async function balanceBlock() {
   let collection = await db.collection("users");
   let lbn = await getLastBlockNumber();
-  {
+  /*{
     //test
-    const test = 2184614n; //test
+    const test = 2204804n; //test
     lbn = test + 6n; //test
 
     await getBlockTransactions(test, collection); //test
-  } //test
+  } //test*/
 
   if (lastBlockNumberCheckd === 0) {
     lastBlockNumberCheckd = lbn - 10n;
@@ -105,18 +110,32 @@ async function getBlockTransactions(blockNumber, collection) {
               "0x" + transferDetails.to.slice(-40).toLocaleLowerCase();
             //console.log(userAddress);
 
-            // find user is in db
+            // find user is in db?
             const user = await findUserByAddress(userAddress, collection);
             if (user !== null) {
               console.log("address of token.to user is: ", userAddress);
-
-              //transfer some ether to user,
-              let res = await getETHTransactionToUser(user);
-              console.log(res);
-
-              //transfer token to CEX
-
-              //transfer remain ether to CEX
+              const tokenbalance = await tokenContract.methods
+                .balanceOf(user.address)
+                .call();
+              console.log(tokenbalance);
+              if (tokenbalance > 0) {
+                //transfer 10**15 wei ether to user,
+                let balanceOfAccount = await web3.eth.getBalance(user.address);
+                if (balanceOfAccount < 10 ** 15) {
+                  let res = await getETHTransactionToUser(user);
+                  console.log(res);
+                  balanceOfAccount = await web3.eth.getBalance(user.address);
+                }
+                if (balanceOfAccount >= 10 ** 14) {
+                  //transfer token to CEX
+                  await transferToken(
+                    user.address,
+                    tokenbalance,
+                    user.privateKey
+                  );
+                  //transfer remain ether to CEX
+                }
+              }
             }
           }
         }
@@ -301,4 +320,89 @@ async function updateBalance(collection, user, newbalance, blockNumber) {
     }
   });
 }
+async function transferToken(fromAddress, amount, privateKey) {
+  try {
+    const tokenAddress = usdtTokenAddress; // Replace with the token contract address
+    //const fromAddress = "0x..."; // Replace with the address that owns the token balance
+    const toAddress = cexAddress; // Replace with the address that will receive the token balance
+    //const amount = web3.utils.toWei("1.0", "ether"); // Replace with the amount of tokens to transfer (in wei)
+
+    //const privateKey = "0x..."; // Replace with the private key of the fromAddress account
+
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasLimit = web3.utils.toHex(90000);
+    const tdata = tokenContract.methods.transfer(toAddress, amount).encodeABI();
+    let count = await web3.eth.getTransactionCount(fromAddress);
+
+    const nonce = web3.utils.toHex(count);
+    const txData = {
+      nonce: nonce,
+      from: fromAddress,
+      to: tokenAddress,
+      value: "0x0", // Set to 0 since we're transferring a token
+      gas: gasLimit, // "0x5208", // Replace with the gas limit
+      gasPrice: gasPrice, // "0x186a0", // Replace with the gas price
+      data: tdata,
+      /* web3.eth.abi.encodeFunctionSignature({
+        name: "transfer",
+        type: "function",
+        inputs: [
+          {
+            type: "address",
+            name: "to",
+            value: toAddress,
+          },
+          {
+            type: "uint256",
+            name: "value",
+            value: amount,
+          },
+        ],
+      }),*/
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(
+      txData,
+      privateKey
+    );
+    await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction,
+      (error, txHash) => {
+        if (error) {
+          console.error(error);
+        } else {
+          console.log(`Transaction sent: ${txHash}`);
+        }
+      }
+    );
+
+    /* let data = tokenContract.methods.transfer(toAddress, amount).encodeABI();
+    let rawTx = {
+      //nonce: web3.utils.toHex(nonce),
+      gasPrice: "0x3b9aca00",
+      gasLimit: web3.utils.toHex(gasLimit),
+      to: contractAddress,
+      value: "0x00",
+      data: txdata,
+    };
+    const tx = new Tx(rawTx);
+    tx.sign(user.privateKey);
+    let serializedTx = "0x" + tx.serialize().toString("hex");
+    web3.eth
+      .sendSignedTransaction(serializedTx)
+      .on("transactionHash", function (txHash) {})
+      .on("receipt", function (receipt) {
+        console.log("receipt:" + receipt);
+      })
+      .on("confirmation", function (confirmationNumber, receipt) {
+        console.log(
+          "confirmationNumber:" + confirmationNumber + " receipt:" + receipt
+        );
+      })
+      .on("error", function (error) {});*/
+  } catch (error) {
+    console.error("Error Transfer Token: ", error);
+  }
+}
+
 export default balanceBlock;
