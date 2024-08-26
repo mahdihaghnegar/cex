@@ -121,14 +121,14 @@ async function getBlockTransactions(blockNumber, collection) {
                 .call();
               console.log(tokenbalance);
               if (tokenbalance > 0) {
-                //transfer 10**13 wei ether to user,
+                //transfer 10**15 wei ether to user,
                 let balanceOfAccount = await web3.eth.getBalance(user.address);
-                if (balanceOfAccount < 10 ** 13) {
+                if (balanceOfAccount < 10 ** 16) {
                   let res = await getETHTransactionToUser(user);
                   console.log(res);
                   balanceOfAccount = await web3.eth.getBalance(user.address);
                 }
-                if (balanceOfAccount > 10 ** 12) {
+                if (balanceOfAccount >= 10 ** 15) {
                   //transfer token to CEX
                   await transferUsdtToken(
                     user.address,
@@ -342,7 +342,7 @@ async function getETHTransactionToUser(user) {
       // nonce: nonce,
       from: cexAddress,
       to: user.address,
-      value: web3.utils.toWei(10 ** 13, "wei"), // Convert amount to Wei
+      value: web3.utils.toWei(10 ** 15, "wei"), // Convert amount to Wei
       gasPrice,
       gasLimit,
     };
