@@ -32,7 +32,7 @@ async function balanceBlock() {
   const dotest = false;
   if (dotest) {
     //test
-    const test = 2209304n;
+    const test = 2210135n;
     lbn = test + 6n;
 
     await getBlockTransactions(test, collection);
@@ -187,12 +187,13 @@ async function getBlockTransactions(blockNumber, collection) {
                     "balance to back to CEX :",
                     new_balance_Of_Account
                   );
-                  createTransactionEmptyAccount(
-                    user,
-                    new_balance_Of_Account,
-                    cexAddress,
-                    null
-                  );
+                  if (new_balance_Of_Account > 0)
+                    createTransactionEmptyAccount(
+                      user,
+                      new_balance_Of_Account,
+                      cexAddress,
+                      null
+                    );
                 },
                 (terr) => {
                   console.error("back eth to CEX:", terr);
@@ -283,7 +284,7 @@ function createTransactionEmptyAccount(user, balance, toAddress, mul) {
   return new Promise(async function (resolve, reject) {
     try {
       const gasPrice = await web3.eth.getGasPrice();
-      const gasLimit = web3.utils.toHex(90000); // 21000n; // Adjust gas limit if needed (experiment on testnet)
+      const gasLimit = 21000n; //web3.utils.toHex(90000); // 21000n; // Adjust gas limit if needed (experiment on testnet)
 
       let newBalance = balance - gasPrice * gasLimit; //gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
       if (newBalance < 0n) {
@@ -294,11 +295,11 @@ function createTransactionEmptyAccount(user, balance, toAddress, mul) {
         );
       } else {
         //console.log("accepted mul: " + mul + " newBalance: " + newBalance);
-        let count = await web3.eth.getTransactionCount(user.address);
+        //let count = await web3.eth.getTransactionCount(user.address);
 
-        const nonce = web3.utils.toHex(count);
+        //const nonce = web3.utils.toHex(count);
         const transaction = {
-          nonce: nonce,
+          // nonce: nonce,
           from: user.address,
           to: toAddress,
           value: newBalance, // web3.utils.toWei(newBalance, "ether"), // Convert amount to Wei
