@@ -19,11 +19,16 @@ routerBalance.post("/", async (req, res) => {
   if (user < 0) {
     return res.status(401).json({ status: "invalid user", message: "error" });
   }
+  var balance = 0;
+  if (user.balance) balance = BigInt(user.balance);
+
+  var usdt = 0;
+  if (user.usdtbalance) usdt = BigInt(user.usdtbalance);
 
   return res.status(200).json({
     message: "success",
-    balance: user.balance.toString(),
-    usdt: user.usdt.toString(),
+    balance: balance.toString(),
+    usdt: usdt.toString(),
   });
 });
 
