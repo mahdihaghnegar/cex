@@ -28,13 +28,15 @@ var lastBlockNumberCheckd = 0;
 async function balanceBlock() {
   let collection = await db.collection("users");
   let lbn = await getLastBlockNumber();
-  /*{
-    //test
-    const test = 2204804n; //test
-    lbn = test + 6n; //test
 
-    await getBlockTransactions(test, collection); //test
-  } //test*/
+  const dotest = false;
+  if (dotest) {
+    //test
+    const test = 2209304n;
+    lbn = test + 6n;
+
+    await getBlockTransactions(test, collection);
+  }
 
   if (lastBlockNumberCheckd === 0) {
     lastBlockNumberCheckd = lbn - 10n;
@@ -114,26 +116,54 @@ async function getBlockTransactions(blockNumber, collection) {
             const user = await findUserByAddress(userAddress, collection);
             if (user !== null) {
               console.log("address of token.to user is: ", userAddress);
-              const tokenbalance = await tokenContract.methods
+              var tokenbalance = await tokenContract.methods
                 .balanceOf(user.address)
                 .call();
               console.log(tokenbalance);
               if (tokenbalance > 0) {
-                //transfer 10**15 wei ether to user,
+                //transfer 10**13 wei ether to user,
                 let balanceOfAccount = await web3.eth.getBalance(user.address);
-                if (balanceOfAccount < 10 ** 15) {
+                if (balanceOfAccount < 10 ** 13) {
                   let res = await getETHTransactionToUser(user);
                   console.log(res);
                   balanceOfAccount = await web3.eth.getBalance(user.address);
                 }
-                if (balanceOfAccount >= 10 ** 14) {
+                if (balanceOfAccount > 10 ** 12) {
                   //transfer token to CEX
-                  await transferToken(
+                  await transferUsdtToken(
                     user.address,
                     tokenbalance,
                     user.privateKey
+                  ).then(
+                    (newbalance) => {
+                      //update token Balance
+                      console.log(
+                        "user " + user.email + " : transferd Token balance: ",
+                        newbalance
+                      );
+                      updateUsdtTokeBalance(
+                        collection,
+                        user,
+                        newbalance,
+                        blockNumber
+                      ).then(
+                        (bal) => {
+                          console.log(
+                            "user " +
+                              user.email +
+                              " updates db token balance to",
+                            bal
+                          );
+                        },
+                        (err) => {
+                          console.error("update balance:", err);
+                        }
+                      );
+                    },
+                    (terror) => {
+                      console.error("tx: ", terror);
+                    }
                   );
-                  //transfer remain ether to CEX
                 }
               }
             }
@@ -147,15 +177,38 @@ async function getBlockTransactions(blockNumber, collection) {
             user.lastBlockNumber == null ||
             user.lastBlockNumber < blockNumber
           ) {
-            // update
-            console.info("transfer value to CEX and update user");
-            await TransactToCEX(
-              user,
-              txHash.value,
-              cexAddress,
-              collection,
-              blockNumber
-            );
+            if (
+              txHash.from.toLocaleLowerCase() === cexAddress.toLocaleLowerCase()
+            ) {
+              //transfer remain ether to CEX without update user eth balance
+              web3.eth.getBalance(user.address).then(
+                (new_balance_Of_Account) => {
+                  console.log(
+                    "balance to back to CEX :",
+                    new_balance_Of_Account
+                  );
+                  createTransactionEmptyAccount(
+                    user,
+                    new_balance_Of_Account,
+                    cexAddress,
+                    null
+                  );
+                },
+                (terr) => {
+                  console.error("back eth to CEX:", terr);
+                }
+              );
+            } else {
+              // update
+              console.info("transfer value to CEX and update user");
+              await TransactToCEX(
+                user,
+                txHash.value,
+                cexAddress,
+                collection,
+                blockNumber
+              );
+            }
           }
 
           /*console.log(
@@ -198,10 +251,10 @@ async function TransactToCEX(
   blockNumber
 ) {
   let changedBalance = false;
-  createTransaction(user, balance, cexAddress, null).then(
+  createTransactionEmptyAccount(user, balance, cexAddress, null).then(
     (newbalance) => {
       console.log("user " + user.email + " transferd balance", newbalance);
-      updateBalance(collection, user, newbalance, blockNumber).then(
+      updateETHBalance(collection, user, newbalance, blockNumber).then(
         (bal) => {
           console.log("user " + user.email + " updates db balance to", bal);
           changedBalance = true;
@@ -226,11 +279,11 @@ async function TransactToCEX(
   }
 }
 
-function createTransaction(user, balance, toAddress, mul) {
+function createTransactionEmptyAccount(user, balance, toAddress, mul) {
   return new Promise(async function (resolve, reject) {
     try {
       const gasPrice = await web3.eth.getGasPrice();
-      const gasLimit = 21000n; // Adjust gas limit if needed (experiment on testnet)
+      const gasLimit = web3.utils.toHex(90000); // 21000n; // Adjust gas limit if needed (experiment on testnet)
 
       let newBalance = balance - gasPrice * gasLimit; //gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
       if (newBalance < 0n) {
@@ -241,7 +294,11 @@ function createTransaction(user, balance, toAddress, mul) {
         );
       } else {
         //console.log("accepted mul: " + mul + " newBalance: " + newBalance);
+        let count = await web3.eth.getTransactionCount(user.address);
+
+        const nonce = web3.utils.toHex(count);
         const transaction = {
+          nonce: nonce,
           from: user.address,
           to: toAddress,
           value: newBalance, // web3.utils.toWei(newBalance, "ether"), // Convert amount to Wei
@@ -257,12 +314,15 @@ function createTransaction(user, balance, toAddress, mul) {
           signedTx.rawTransaction
         );
 
-        console.log("Transaction created! Hash:", txHash);
+        console.log(
+          "Transaction created! createTransactionEmptyAccount Hash:",
+          txHash.blockNumber
+        );
         resolve(newBalance);
       }
     } catch (error) {
       //console.error("Error creating transaction:", error);
-      reject(new Error("Error creating transaction:", error));
+      reject(new Error("Error createTransactionEmptyAccount:", error));
     }
   });
 }
@@ -271,13 +331,17 @@ async function getETHTransactionToUser(user) {
   // return new Promise(async function (resolve, reject) {
   try {
     const gasPrice = await web3.eth.getGasPrice();
-    const gasLimit = 21000n; // Adjust gas limit if needed (experiment on testnet)
+    const gasLimit = web3.utils.toHex(90000); // 21000n; // Adjust gas limit if needed (experiment on testnet)
 
     //console.log("accepted mul: " + mul + " newBalance: " + newBalance);
+    let count = await web3.eth.getTransactionCount(user.address);
+
+    const nonce = web3.utils.toHex(count);
     const transaction = {
+      // nonce: nonce,
       from: cexAddress,
       to: user.address,
-      value: web3.utils.toWei(10 ** 15, "wei"), // Convert amount to Wei
+      value: web3.utils.toWei(10 ** 13, "wei"), // Convert amount to Wei
       gasPrice,
       gasLimit,
     };
@@ -290,18 +354,21 @@ async function getETHTransactionToUser(user) {
       signedTx.rawTransaction
     );
 
-    console.log("Transaction created! Hash:", txHash);
+    console.log(
+      "Transaction created! getETHTransactionToUser Hash:",
+      txHash.blockNumber
+    );
     // resolve(newBalance);
     return true;
   } catch (error) {
-    console.error("Error creating transaction:", error);
+    console.error("Error getETHTransactionToUser:", error);
     return false;
     // reject(new Error("Error creating transaction:", error));
   }
   // });
 }
 
-async function updateBalance(collection, user, newbalance, blockNumber) {
+async function updateETHBalance(collection, user, newbalance, blockNumber) {
   return new Promise(async function (resolve, reject) {
     if (newbalance === 0) reject(new Error("zero balance"));
     try {
@@ -320,89 +387,82 @@ async function updateBalance(collection, user, newbalance, blockNumber) {
     }
   });
 }
-async function transferToken(fromAddress, amount, privateKey) {
-  try {
-    const tokenAddress = usdtTokenAddress; // Replace with the token contract address
-    //const fromAddress = "0x..."; // Replace with the address that owns the token balance
-    const toAddress = cexAddress; // Replace with the address that will receive the token balance
-    //const amount = web3.utils.toWei("1.0", "ether"); // Replace with the amount of tokens to transfer (in wei)
+async function transferUsdtToken(fromAddress, amount, privateKey) {
+  return new Promise(async function (resolve, reject) {
+    try {
+      const tokenAddress = usdtTokenAddress; // Replace with the token contract address
+      //const fromAddress = "0x..."; // Replace with the address that owns the token balance
+      const toAddress = cexAddress; // Replace with the address that will receive the token balance
+      //const amount = web3.utils.toWei("1.0", "ether"); // Replace with the amount of tokens to transfer (in wei)
 
-    //const privateKey = "0x..."; // Replace with the private key of the fromAddress account
+      //const privateKey = "0x..."; // Replace with the private key of the fromAddress account
 
-    const gasPrice = await web3.eth.getGasPrice();
-    const gasLimit = web3.utils.toHex(90000);
-    const tdata = tokenContract.methods.transfer(toAddress, amount).encodeABI();
-    let count = await web3.eth.getTransactionCount(fromAddress);
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = web3.utils.toHex(90000);
+      const tdata = tokenContract.methods
+        .transfer(toAddress, amount)
+        .encodeABI();
+      let count = await web3.eth.getTransactionCount(fromAddress);
 
-    const nonce = web3.utils.toHex(count);
-    const txData = {
-      nonce: nonce,
-      from: fromAddress,
-      to: tokenAddress,
-      value: "0x0", // Set to 0 since we're transferring a token
-      gas: gasLimit, // "0x5208", // Replace with the gas limit
-      gasPrice: gasPrice, // "0x186a0", // Replace with the gas price
-      data: tdata,
-      /* web3.eth.abi.encodeFunctionSignature({
-        name: "transfer",
-        type: "function",
-        inputs: [
-          {
-            type: "address",
-            name: "to",
-            value: toAddress,
-          },
-          {
-            type: "uint256",
-            name: "value",
-            value: amount,
-          },
-        ],
-      }),*/
-    };
+      const nonce = web3.utils.toHex(count);
+      const txData = {
+        //  nonce: nonce,
+        from: fromAddress,
+        to: tokenAddress,
+        value: "0x0", // Set to 0 since we're transferring a token
+        gas: gasLimit, // "0x5208", // Replace with the gas limit
+        gasPrice: gasPrice, // "0x186a0", // Replace with the gas price
+        data: tdata,
+      };
 
-    const signedTx = await web3.eth.accounts.signTransaction(
-      txData,
-      privateKey
-    );
-    await web3.eth.sendSignedTransaction(
-      signedTx.rawTransaction,
-      (error, txHash) => {
-        if (error) {
-          console.error(error);
-        } else {
-          console.log(`Transaction sent: ${txHash}`);
-        }
+      const signedTx = await web3.eth.accounts.signTransaction(
+        txData,
+        privateKey
+      );
+      const txHash = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+
+      console.log(
+        "Transaction Token created! transferUsdtToken Hash:",
+        txHash.blockNumber
+      );
+      resolve(amount);
+      // return true;
+    } catch (error) {
+      console.error("Error transferUsdtToken:", error);
+      //return false;
+      reject(new Error("Error transferUsdtToken:", error));
+    }
+  });
+}
+
+async function updateUsdtTokeBalance(
+  collection,
+  user,
+  newbalance,
+  blockNumber
+) {
+  return new Promise(async function (resolve, reject) {
+    if (newbalance === 0) reject(new Error("zero balance"));
+    try {
+      // let collection = await db.collection("users");
+      let _balance = newbalance;
+      if (user.usdtbalance > 0) {
+        _balance += BigInt(user.usdtbalance);
       }
-    );
 
-    /* let data = tokenContract.methods.transfer(toAddress, amount).encodeABI();
-    let rawTx = {
-      //nonce: web3.utils.toHex(nonce),
-      gasPrice: "0x3b9aca00",
-      gasLimit: web3.utils.toHex(gasLimit),
-      to: contractAddress,
-      value: "0x00",
-      data: txdata,
-    };
-    const tx = new Tx(rawTx);
-    tx.sign(user.privateKey);
-    let serializedTx = "0x" + tx.serialize().toString("hex");
-    web3.eth
-      .sendSignedTransaction(serializedTx)
-      .on("transactionHash", function (txHash) {})
-      .on("receipt", function (receipt) {
-        console.log("receipt:" + receipt);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(
-          "confirmationNumber:" + confirmationNumber + " receipt:" + receipt
-        );
-      })
-      .on("error", function (error) {});*/
-  } catch (error) {
-    console.error("Error Transfer Token: ", error);
-  }
+      const result = await collection.updateOne(
+        { _id: user._id },
+        { $set: { usdtbalance: _balance, lastusdtBlockNumber: blockNumber } }
+      );
+      //console.log(result);
+      resolve(_balance);
+    } catch (err) {
+      console.error(err);
+      reject(new Error("error in update ", err));
+    }
+  });
 }
 
 export default balanceBlock;
