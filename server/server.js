@@ -15,7 +15,7 @@ const app = express();
 
 // middleware
 const corsOptions = {
-  origin: "http://localhost:3000", // "https://cex-fr.onrender.com", //
+  origin: "https://cex-fr.onrender.com", //"http://localhost:3000", //
 };
 app.use(express.json());
 app.use(cors(corsOptions));

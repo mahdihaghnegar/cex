@@ -8,7 +8,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const serverURL = "http://localhost:5050"; //"https://cex-sr.onrender.com"; //
+  const serverURL = "https://cex-sr.onrender.com"; // "http://localhost:5050";
   useEffect(() => {
     // Fetch the user email and token from local storage
     const user = JSON.parse(localStorage.getItem("user"));
