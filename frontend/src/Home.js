@@ -2,7 +2,7 @@ import { React, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "./Table";
 const Home = (props) => {
-  const { loggedIn, email, address, serverURL } = props;
+  const { loggedIn, email, address, serverURL, setToken } = props;
   const [balance, setBalance] = useState(0);
   const [usdtBalance, setusdtBalance] = useState(0);
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ const Home = (props) => {
       </div>
       <div className="mainContainer">
         <div className={"titleContainer"}>
-          <div>صرافی غیر متمرکز مهدی!</div>
+          <div>صرافی غیر متمرکز ایکس!</div>
           {loggedIn && (
             <div>
               <br />
@@ -75,16 +75,8 @@ const Home = (props) => {
             </div>
           )}
         </div>
-        {loggedIn ? (
-          <>
-            <Table holesky={balance} usdt={usdtBalance} />
-            {/* <div>
-              holesky ether : {balance}
-              <br /> usdt Token Balance : {usdtBalance}
-            </div> */}
-          </>
-        ) : (
-          <div />
+        {loggedIn && (
+          <Table holesky={balance} usdt={usdtBalance} setToken={setToken} />
         )}
       </div>
     </>

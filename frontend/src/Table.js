@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Table.css";
 
 const Table = (props) => {
-  const { holesky, usdt } = props;
+  const navigate = useNavigate();
+  const { holesky, usdt, setToken } = props;
   const data = [
     {
+      token: "eth",
       status: "✔️",
       invoice: "Holesky",
       date: "2024-09-13",
@@ -12,6 +15,7 @@ const Table = (props) => {
       actions: "✏️",
     },
     {
+      token: "usdt",
       status: "✔️",
       invoice: "Cex usdt Erc20 Token",
       date: "2024-09-12",
@@ -19,7 +23,19 @@ const Table = (props) => {
       actions: "✏️",
     },
   ];
+  const handleSubmit = (e, index) => {
+    e.preventDefault();
 
+    if (index === 0) setToken("eth");
+    else setToken("usdt");
+    navigate("/withdraw");
+  };
+
+  const handleButtonClick = (token) => {
+    //alert(`Button clicked for invoice: ${token}`);
+    setToken(token);
+    navigate("/withdraw");
+  };
   return (
     <div className="table-container">
       <table>
@@ -27,21 +43,24 @@ const Table = (props) => {
           <tr>
             <th>رمز ارز</th>
             <th>موجودی</th>
-            {/* <th>Date</th>
-            <th>Amount</th>
-            <th>Actions</th> */}
+            <th>برداشت</th>
           </tr>
         </thead>
         <tbody>
           {data.map((row, index) => (
-            // <tr key={index} className={index === 2 ? "highlight" : ""}>
-            <tr>
-              {/* <td>{row.status}</td> */}
+            // <tr className={index === 2 ? "highlight" : ""}>
+            <tr key={index}>
               <td>{row.invoice}</td>
               <td>{row.amount}</td>
-              {/* <td>{row.date}</td>
-              
-              <td>{row.actions}</td> */}
+              <td>
+                <button onClick={() => handleButtonClick(row.token)}>
+                  برداشت
+                </button>
+
+                {/* <form onSubmit={(e, index) => handleSubmit(e, index)}>
+                  <button type="submit">برداشت</button>
+                </form> */}
+              </td>
             </tr>
           ))}
         </tbody>

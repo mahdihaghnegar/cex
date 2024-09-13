@@ -1,12 +1,14 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./Home";
 import Login from "./Login";
+import Withdraw from "./Withdraw";
 import "./App.css";
 import { useEffect, useState } from "react";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [address, setAddress] = useState("");
   const serverURL = "http://localhost:5050"; //"https://cex-sr.onrender.com"; //
   useEffect(() => {
@@ -46,10 +48,17 @@ function App() {
                 address={address}
                 loggedIn={loggedIn}
                 setLoggedIn={setLoggedIn}
+                setToken={setToken}
                 serverURL={serverURL}
               />
             }
           />
+          {loggedIn && token !== "" && (
+            <Route
+              path="/withdraw"
+              element={<Withdraw token={token} address={address} />}
+            />
+          )}
           <Route
             path="/login"
             element={

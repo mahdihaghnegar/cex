@@ -113,7 +113,7 @@ const Login = (props) => {
         </div>
       </div>
       <form onSubmit={handleSubmit}>
-        <h2>ورود به صرافی غیر متمرکز مهدی</h2>
+        <h2>ورود به صرافی غیر متمرکز ایکس</h2>
         <div className="input-group">
           <label> ايميل</label>
           <input
