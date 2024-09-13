@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import "./Login.css";
 const Login = (props) => {
   const { serverURL } = props;
   const [email, setEmail] = useState("");
@@ -10,7 +10,9 @@ const Login = (props) => {
 
   const navigate = useNavigate();
 
-  const onButtonClick = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Handle login logic here
     // Set initial error values to empty
     setEmailError("");
     setPasswordError("");
@@ -101,40 +103,31 @@ const Login = (props) => {
   };
 
   return (
-    <div className={"mainContainer"}>
-      <div className={"titleContainer"}>
-        <div>Login</div>
-      </div>
-      <br />
-      <div className={"inputContainer"}>
-        <input
-          value={email}
-          placeholder="Enter your email here"
-          onChange={(ev) => setEmail(ev.target.value)}
-          className={"inputBox"}
-        />
-        <label className="errorLabel">{emailError}</label>
-      </div>
-      <br />
-      <div className={"inputContainer"}>
-        <input
-          value={password}
-          type="password"
-          placeholder="Enter your password here"
-          onChange={(ev) => setPassword(ev.target.value)}
-          className={"inputBox"}
-        />
-        <label className="errorLabel">{passwordError}</label>
-      </div>
-      <br />
-      <div className={"inputContainer"}>
-        <input
-          className={"inputButton"}
-          type="button"
-          onClick={onButtonClick}
-          value={"Log in"}
-        />
-      </div>
+    <div className="login-container">
+      <form onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        <div className="input-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <label className="errorLabel">{emailError}</label>
+        </div>
+        <div className="input-group">
+          <label>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />{" "}
+          <label className="errorLabel">{passwordError}</label>
+        </div>
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
 };
