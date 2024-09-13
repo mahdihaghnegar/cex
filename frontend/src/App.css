@@ -36,9 +36,9 @@
 .buttonContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 260px;
+  align-items: left;
+  justify-content: left;
+  /*height: 260px;*/
 }
 
 .inputContainer {

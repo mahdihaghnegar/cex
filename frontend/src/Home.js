@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import Table from "./Table";
 const Home = (props) => {
   const { loggedIn, email, address, serverURL } = props;
   const [balance, setBalance] = useState(0);
@@ -54,54 +54,40 @@ const Home = (props) => {
     }
   };
 
-  const onUpdateDepositClick = () => {
-    if (loggedIn) {
-      // setBalance(1);
-      //fetch balance
-
-      // Fetch the user email and token from local storage
-      //const user = JSON.parse(localStorage.getItem("user"));
-
-      // Call the server API to check if the given email ID already exists
-      checkEmailBalance();
-    } else {
-      setBalance(0);
-    }
-  };
-
   return (
-    <div className="mainContainer">
-      <div className={"titleContainer"}>
-        <div>Welcome!</div>
-      </div>
-      <div>This is the home page.</div>
+    <>
       <div className={"buttonContainer"}>
         <input
           className={"inputButton"}
           type="button"
           onClick={onButtonClick}
-          value={loggedIn ? "Log out" : "Log in"}
+          value={loggedIn ? "خروج" : "ورود"}
         />
+      </div>
+      <div className="mainContainer">
+        <div className={"titleContainer"}>
+          <div>صرافی غیر متمرکز مهدی!</div>
+          {loggedIn && (
+            <div>
+              <br />
+              {email} <br /> {address}
+              <br />
+            </div>
+          )}
+        </div>
         {loggedIn ? (
-          <div>
-            Your email address is {email}
-            <br />
-            Your ether address is {address}
-            {/* <br />
-            <input
-              className={"inputButton"}
-              type="button"
-              onClick={onUpdateDepositClick}
-              value="Update Deposite"
-            /> */}
-            <br /> Your holesky ether Balance in database is {balance}
-            <br /> Your usdt Token Balance in database is {usdtBalance}
-          </div>
+          <>
+            <Table holesky={balance} usdt={usdtBalance} />
+            {/* <div>
+              holesky ether : {balance}
+              <br /> usdt Token Balance : {usdtBalance}
+            </div> */}
+          </>
         ) : (
           <div />
         )}
       </div>
-    </div>
+    </>
   );
 };
 
