@@ -68,11 +68,11 @@ const Home = (props) => {
         <div className={"titleContainer"}>
           <div>صرافی غیر متمرکز ایکس!</div>
           {loggedIn && (
-            <div>
+            <h5>
               <br />
               {email} <br /> {address}
               <br />
-            </div>
+            </h5>
           )}
         </div>
         {loggedIn && (

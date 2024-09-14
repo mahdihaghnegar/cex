@@ -1,3 +1,16 @@
+body {
+  background: linear-gradient(
+    10deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgb(29, 29, 105) 35%,
+    rgb(47, 42, 122) 100%
+  ); /* #2c2c54;*/
+  color: white;
+  font-family: "Arial", sans-serif;
+  direction: rtl;
+  height: 100vh;
+}
+
 .mainContainer {
   flex-direction: column;
   display: flex;

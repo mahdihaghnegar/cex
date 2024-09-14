@@ -29,6 +29,8 @@ async function balanceBlock() {
   let collection = await db.collection("users");
   let lbn = await getLastBlockNumber();
 
+  if (lbn === null || lbn === undefined) return;
+
   const dotest = false;
   if (dotest) {
     //test
