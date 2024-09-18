@@ -11,6 +11,7 @@ function App() {
   const [token, setToken] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [address, setAddress] = useState("");
+  //const [jwt, setJwt] = useState("");
   const serverURL = "http://localhost:5050"; //"https://cex-sr.onrender.com"; //
   useEffect(() => {
     // Fetch the user email and token from local storage
@@ -21,7 +22,7 @@ function App() {
       setLoggedIn(false);
       return;
     }
-
+    //setJwt(user.token);
     // If the token exists, verify it with the auth server to see if it is valid
     fetch(`${serverURL}/verify`, {
       method: "POST",
@@ -63,6 +64,8 @@ function App() {
                   token={token}
                   address={address}
                   maxAmount={maxAmount}
+                  serverURL={serverURL}
+                  // jwt={jwt}
                 />
               }
             />

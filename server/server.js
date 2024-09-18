@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 //import records from "./routes/record.js";
+import transactions from "./routes/transaction.js";
 import users from "./routes/user.js";
 import auths from "./routes/auth.js";
 import verifys from "./routes/verify.js";
@@ -24,6 +25,7 @@ app.use("/user", users);
 app.use("/auth", auths);
 app.use("/verify", verifys);
 app.use("/check-account", checkAccounts);
+app.use("/transaction", transactions);
 
 /*setInterval(() => {
   loopUpdate(null);
