@@ -4,7 +4,7 @@ import "./Table.css";
 
 const Table = (props) => {
   const navigate = useNavigate();
-  const { holesky, usdt, setToken } = props;
+  const { holesky, usdt, setToken, setMaxAmount } = props;
   const data = [
     {
       token: "eth",
@@ -31,9 +31,10 @@ const Table = (props) => {
     navigate("/withdraw");
   };
 
-  const handleButtonClick = (token) => {
+  const handleButtonClick = (token, amount) => {
     //alert(`Button clicked for invoice: ${token}`);
     setToken(token);
+    setMaxAmount(amount);
     navigate("/withdraw");
   };
   return (
@@ -53,9 +54,13 @@ const Table = (props) => {
               <td>{row.invoice}</td>
               <td>{row.amount}</td>
               <td>
-                <button onClick={() => handleButtonClick(row.token)}>
-                  برداشت
-                </button>
+                {row.amount > 0 && (
+                  <button
+                    onClick={() => handleButtonClick(row.token, row.amount)}
+                  >
+                    برداشت
+                  </button>
+                )}
 
                 {/* <form onSubmit={(e, index) => handleSubmit(e, index)}>
                   <button type="submit">برداشت</button>

@@ -9,6 +9,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
+  const [maxAmount, setMaxAmount] = useState("");
   const [address, setAddress] = useState("");
   const serverURL = "http://localhost:5050"; //"https://cex-sr.onrender.com"; //
   useEffect(() => {
@@ -49,6 +50,7 @@ function App() {
                 loggedIn={loggedIn}
                 setLoggedIn={setLoggedIn}
                 setToken={setToken}
+                setMaxAmount={setMaxAmount}
                 serverURL={serverURL}
               />
             }
@@ -56,7 +58,13 @@ function App() {
           {loggedIn && token !== "" && (
             <Route
               path="/withdraw"
-              element={<Withdraw token={token} address={address} />}
+              element={
+                <Withdraw
+                  token={token}
+                  address={address}
+                  maxAmount={maxAmount}
+                />
+              }
             />
           )}
           <Route

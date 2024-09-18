@@ -2,7 +2,7 @@ import { React, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "./Table";
 const Home = (props) => {
-  const { loggedIn, email, address, serverURL, setToken } = props;
+  const { loggedIn, email, address, serverURL, setToken, setMaxAmount } = props;
   const [balance, setBalance] = useState(0);
   const [usdtBalance, setusdtBalance] = useState(0);
   const navigate = useNavigate();
@@ -76,7 +76,12 @@ const Home = (props) => {
           )}
         </div>
         {loggedIn && (
-          <Table holesky={balance} usdt={usdtBalance} setToken={setToken} />
+          <Table
+            holesky={balance}
+            usdt={usdtBalance}
+            setToken={setToken}
+            setMaxAmount={setMaxAmount}
+          />
         )}
       </div>
     </>
