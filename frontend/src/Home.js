@@ -74,7 +74,12 @@ const Home = (props) => {
             {email} <br /> {address}
           </h5>
         </div>
-        <Table holesky={balance} usdt={usdtBalance} />
+        <Table
+          address={address}
+          serverURL={serverURL}
+          holesky={balance}
+          usdt={usdtBalance}
+        />
       </div>
     </>
   );

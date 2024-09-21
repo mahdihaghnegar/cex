@@ -31,9 +31,10 @@ h2 {
 }
 
 button {
-  width: 100%;
+  width: 40%;
   padding: 10px;
-  background-color: #007bff;
+  margin: 10px;
+  background-color: cornflowerblue; /* #007bff;*/
   color: white;
   border: none;
   border-radius: 5px;

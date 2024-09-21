@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Withdraw.css";
 
 const Withdraw = (props) => {
-  const { token, address, maxAmount, serverURL, jwt } = props;
+  const { token, address, maxAmount, serverURL, setViewTable } = props;
   const [amount, setAmount] = useState("");
   const [toaddress, setToAddress] = useState("");
   const [amountError, setAmountError] = useState("");
@@ -19,7 +19,7 @@ const Withdraw = (props) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "jwt-token": jwt,
+        //"jwt-token": jwt,
       },
       body: JSON.stringify({ address }),
     })
@@ -78,6 +78,9 @@ const Withdraw = (props) => {
           <label className="errorLabel">{amountError}</label>
         </div>
         <button type="submit">درخواست برداشت</button>
+        <button className="button" onClick={() => setViewTable(true)}>
+          برگشت
+        </button>
       </form>
     </div>
   );

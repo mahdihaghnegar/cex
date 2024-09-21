@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 //import { useNavigate } from "react-router-dom";
 import "./Table.css";
-
+import Withdraw from "./Withdraw";
 const Table = (props) => {
-  //const navigate = useNavigate();
-  const [viewTable, setViewTable] = useState(true);
   const {
+    address,
+    serverURL,
     holesky,
     usdt, // setToken, setMaxAmount
   } = props;
+  //const navigate = useNavigate();
+  const [viewTable, setViewTable] = useState(true);
+  const [token, setToken] = useState("");
+  const [maxAmount, setMaxAmount] = useState(0);
+
   const data = [
     {
       token: "eth",
@@ -31,10 +36,10 @@ const Table = (props) => {
     setViewTable(!viewTable);
   };
   const handleButtonClick = (token, amount) => {
-    toggleViewTable();
     //alert(`Button clicked for invoice: ${token}`);
-    // setToken(token);
-    // setMaxAmount(amount);
+    setToken(token);
+    setMaxAmount(amount);
+    toggleViewTable();
     //  navigate("/withdraw");
   };
   return viewTable ? (
@@ -72,7 +77,13 @@ const Table = (props) => {
       </table>
     </div>
   ) : (
-    <h1>withdraw</h1>
+    <Withdraw
+      token={token}
+      address={address}
+      maxAmount={maxAmount}
+      serverURL={serverURL}
+      setViewTable={setViewTable}
+    />
   );
 };
 
