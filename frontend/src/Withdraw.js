@@ -37,7 +37,7 @@ const Withdraw = (props) => {
     console.log("Max Amount:", maxAmount);
     setAmountError("");
     setToError("");
-    if (amount > maxAmount) {
+    if (parseInt(amount) > parseInt(maxAmount)) {
       setAmountError("حداکثر مقدار قابل برداشت " + maxAmount + " می باشد");
       return;
     }
