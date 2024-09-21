@@ -1,11 +1,17 @@
 import { React, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import Table from "./Table";
 const Home = (props) => {
-  const { loggedIn, email, address, serverURL, setToken, setMaxAmount } = props;
+  const {
+    loggedIn,
+    email,
+    address,
+    serverURL,
+    //   setToken, setMaxAmount
+  } = props;
   const [balance, setBalance] = useState(0);
   const [usdtBalance, setusdtBalance] = useState(0);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -24,9 +30,7 @@ const Home = (props) => {
     if (loggedIn) {
       localStorage.removeItem("user");
       props.setLoggedIn(false);
-    } else {
-      navigate("/login");
-    }
+    } //else {navigate("/login");}
   };
 
   const checkEmailBalance = () => {
@@ -56,33 +60,21 @@ const Home = (props) => {
 
   return (
     <>
-      <div className={"buttonContainer"}>
-        <input
-          className={"inputButton"}
-          type="button"
-          onClick={onButtonClick}
-          value={loggedIn ? "خروج" : "ورود"}
-        />
-      </div>
+      <input
+        className={"inputButton"}
+        type="button"
+        onClick={onButtonClick}
+        value={loggedIn ? "خروج" : "ورود"}
+      />
+
       <div className="mainContainer">
         <div className={"titleContainer"}>
           <div>صرافی غیر متمرکز ایکس!</div>
-          {loggedIn && (
-            <h5>
-              <br />
-              {email} <br /> {address}
-              <br />
-            </h5>
-          )}
+          <h5>
+            {email} <br /> {address}
+          </h5>
         </div>
-        {loggedIn && (
-          <Table
-            holesky={balance}
-            usdt={usdtBalance}
-            setToken={setToken}
-            setMaxAmount={setMaxAmount}
-          />
-        )}
+        <Table holesky={balance} usdt={usdtBalance} />
       </div>
     </>
   );

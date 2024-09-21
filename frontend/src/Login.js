@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import "./Login.css";
 const Login = (props) => {
   const { serverURL } = props;
@@ -8,7 +8,7 @@ const Login = (props) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -92,10 +92,11 @@ const Login = (props) => {
             "user",
             JSON.stringify({ email, token: r.token, address: r.address })
           );
-          props.setLoggedIn(true);
+
           props.setEmail(email);
           props.setAddress(r.address);
-          navigate("/");
+          props.setLoggedIn(true);
+          //       navigate("/");
         } else {
           window.alert("Wrong email or password");
         }

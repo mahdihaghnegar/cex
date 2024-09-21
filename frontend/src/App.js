@@ -1,10 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import Home from "./Home";
 import Login from "./Login";
 import Withdraw from "./Withdraw";
 import "./App.css";
 import { useEffect, useState } from "react";
-
+import FakeHome from "./fakehome";
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
@@ -40,49 +41,22 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Home
-                email={email}
-                address={address}
-                loggedIn={loggedIn}
-                setLoggedIn={setLoggedIn}
-                setToken={setToken}
-                setMaxAmount={setMaxAmount}
-                serverURL={serverURL}
-              />
-            }
-          />
-          {loggedIn && token !== "" && (
-            <Route
-              path="/withdraw"
-              element={
-                <Withdraw
-                  token={token}
-                  address={address}
-                  maxAmount={maxAmount}
-                  serverURL={serverURL}
-                  // jwt={jwt}
-                />
-              }
-            />
-          )}
-          <Route
-            path="/login"
-            element={
-              <Login
-                setLoggedIn={setLoggedIn}
-                setEmail={setEmail}
-                setAddress={setAddress}
-                serverURL={serverURL}
-              />
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      {loggedIn ? (
+        <Home
+          email={email}
+          address={address}
+          loggedIn={loggedIn}
+          setLoggedIn={setLoggedIn}
+          serverURL={serverURL}
+        />
+      ) : (
+        <Login
+          setLoggedIn={setLoggedIn}
+          setEmail={setEmail}
+          setAddress={setAddress}
+          serverURL={serverURL}
+        />
+      )}
     </div>
   );
 }
