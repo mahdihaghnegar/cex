@@ -13,7 +13,7 @@ const Withdraw = (props) => {
     return regex.test(address);
   };
 
-  const existAddress = (address) => {
+  const existAddress = (callback) => {
     // If the token exists, verify it with the auth server to see if it is valid
     fetch(`${serverURL}/transaction/check-address`, {
       method: "POST",
@@ -21,11 +21,11 @@ const Withdraw = (props) => {
         "Content-Type": "application/json",
         //"jwt-token": jwt,
       },
-      body: JSON.stringify({ address }),
+      body: JSON.stringify({ address: toaddress }),
     })
       .then((r) => r.json())
       .then((r) => {
-        return "success" === r.message;
+        callback("success" === r.message);
       });
   };
   const handleSubmit = (e) => {
@@ -45,10 +45,18 @@ const Withdraw = (props) => {
       setToError("فرمت آدرس صحبح نمی باشد!");
       return;
     }
-    if (!existAddress(toaddress)) {
-      setToError("آدرس موجود نمی باشد");
+    if (address === toaddress) {
+      setToError("آدرس مبدا و مقصد نباید یکسان باشد");
       return;
     }
+    existAddress((toadressexist) => {
+      if (!toadressexist) {
+        setToError("آدرس موجود نمی باشد");
+        return;
+      } else {
+        setToError("go");
+      }
+    });
   };
 
   return (
