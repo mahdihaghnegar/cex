@@ -42,7 +42,6 @@ const Withdraw = (props) => {
       },
       body: JSON.stringify({
         toaddress: toaddress,
-        from: user.address,
         amount: amount,
         token: token,
       }),
