@@ -2,18 +2,15 @@ import React, { useState } from "react";
 import "./Withdraw.css";
 
 const Withdraw = (props) => {
-  const {
-    token,
-    maxAmount,
-    serverURL,
-    setViewTable, //jwt
-  } = props;
+  const { token, maxAmount, serverURL, setViewTable } = props;
   const [amount, setAmount] = useState("");
   const [toaddress, setToAddress] = useState("");
   const [amountError, setAmountError] = useState("");
   const [toError, setToError] = useState("");
+
   // Fetch the user email and token from local storage
   const user = JSON.parse(localStorage.getItem("user"));
+
   const validateAddress = (address) => {
     const regex = /^(0x)?[0-9a-fA-F]{40}$/;
     return regex.test(address);
@@ -21,14 +18,15 @@ const Withdraw = (props) => {
 
   const existAddress = (callback) => {
     // If the token exists, verify it with the auth server to see if it is valid
-    fetch(`${serverURL}/transaction/check-address`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        //"jwt-token": jwt,
-      },
-      body: JSON.stringify({ address: toaddress }),
-    })
+    fetch(
+      `${serverURL}/transaction/?address=${encodeURIComponent(toaddress)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
       .then((r) => r.json())
       .then((r) => {
         callback("success" === r.message);
@@ -40,7 +38,7 @@ const Withdraw = (props) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "jwt-token": user.jwt,
+        "jwt-token": user.token,
       },
       body: JSON.stringify({
         toaddress: toaddress,
@@ -81,13 +79,13 @@ const Withdraw = (props) => {
         return;
       } else {
         setToError("go");
-        /*transaction((success) => {
+        transaction((success) => {
           if (success) setViewTable(true);
           else {
             setToError("تراکنش ناموفق! دوباره سعی کنید!");
             return;
           }
-        });*/
+        });
       }
     });
   };
