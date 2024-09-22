@@ -46,6 +46,7 @@ const Withdraw = (props) => {
         toaddress: toaddress,
         from: user.address,
         amount: amount,
+        token: token,
       }),
     })
       .then((r) => r.json())

@@ -1,18 +1,17 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+//import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Home from "./Home";
 import Login from "./Login";
 //import Withdraw from "./Withdraw";
 import "./App.css";
 import { useEffect, useState } from "react";
-import FakeHome from "./fakehome";
+//import FakeHome from "./fakehome";
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [email, setEmail] = useState("");
-  //const [token, setToken] = useState("");
-  // const [maxAmount, setMaxAmount] = useState("");
-  const [address, setAddress] = useState("");
-  //const [jwt, setJwt] = useState("");
+  //const [email, setEmail] = useState("");
+
+  //const [address, setAddress] = useState("");
+
   const serverURL = "http://localhost:5050"; //"https://cex-sr.onrender.com"; //
 
   useEffect(() => {
@@ -26,7 +25,7 @@ function App() {
       setLoggedIn(false);
       return;
     }
-    //setJwt(user.token);
+
     // If the token exists, verify it with the auth server to see if it is valid
     fetch(`${serverURL}/verify`, {
       method: "POST",
@@ -37,8 +36,8 @@ function App() {
       .then((r) => r.json())
       .then((r) => {
         setLoggedIn("success" === r.message);
-        setEmail(user.email || "");
-        setAddress(user.address || "");
+        //setEmail(user.email || "");
+        //setAddress(user.address || "");
       });
   }, []);
 
@@ -53,8 +52,8 @@ function App() {
       ) : (
         <Login
           setLoggedIn={setLoggedIn}
-          setEmail={setEmail}
-          setAddress={setAddress}
+          //setEmail={setEmail}
+          //setAddress={setAddress}
           serverURL={serverURL}
         />
       )}

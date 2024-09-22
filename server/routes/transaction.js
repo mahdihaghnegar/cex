@@ -23,8 +23,6 @@ const web3 = new Web3(web3Provider);
 // Function to validate Ethereum address
 
 const verifyJWT = (authToken) => {
-  const tokenHeaderKey = "jwt-token";
-
   //const JWTSecretKey = process.env.JWTSecretKey || "";
   const JWTSecretKey = "dsfdsfsdfdsvcsvdfgefg";
 
@@ -48,6 +46,24 @@ router.post("/check-address", (req, res) => {
   }
 
   if (validateAddress(address)) {
+    return res.status(200).json({ message: "success" });
+  } else {
+    return res.status(400).json({ message: "Invalid Ethereum address" });
+  }
+});
+
+router.post("/", (req, res) => {
+  const tokenHeaderKey = "jwt-token";
+  const authToken = req.headers[tokenHeaderKey];
+  const verify = verifyJWT(authToken);
+
+  if (!verify) {
+    return res.status(403).json({ message: "jwt  is required" });
+  }
+
+  const { toaddress, from, amount, token } = req.body;
+
+  if (validateAddress(toaddress)) {
     return res.status(200).json({ message: "success" });
   } else {
     return res.status(400).json({ message: "Invalid Ethereum address" });
