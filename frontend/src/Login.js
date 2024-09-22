@@ -2,14 +2,14 @@ import React, { useState } from "react";
 //import { useNavigate } from "react-router-dom";
 import "./Login.css";
 const Login = (props) => {
-  const { serverURL } = props;
+  //const { serverURL } = props;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
   //const navigate = useNavigate();
-
+  //const serverURL = JSON.parse(localStorage.getItem("serverURL"));
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
@@ -60,7 +60,7 @@ const Login = (props) => {
   // Call the server API to check if the given email ID already exists
   const checkAccountExists = (callback) => {
     try {
-      fetch(`${serverURL}/check-account`, {
+      fetch(`${props.serverURL}/check-account`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ const Login = (props) => {
 
   // Log in a user using email and password
   const logIn = () => {
-    fetch(`${serverURL}/auth`, {
+    fetch(`${props.serverURL}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -93,8 +93,8 @@ const Login = (props) => {
             JSON.stringify({ email, token: r.token, address: r.address })
           );
 
-          props.setEmail(email);
-          props.setAddress(r.address);
+          //props.setEmail(email);
+          //props.setAddress(r.address);
           props.setLoggedIn(true);
           //       navigate("/");
         } else {

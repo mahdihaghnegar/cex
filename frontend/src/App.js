@@ -2,19 +2,22 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Home from "./Home";
 import Login from "./Login";
-import Withdraw from "./Withdraw";
+//import Withdraw from "./Withdraw";
 import "./App.css";
 import { useEffect, useState } from "react";
 import FakeHome from "./fakehome";
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
-  const [maxAmount, setMaxAmount] = useState("");
+  //const [token, setToken] = useState("");
+  // const [maxAmount, setMaxAmount] = useState("");
   const [address, setAddress] = useState("");
   //const [jwt, setJwt] = useState("");
   const serverURL = "http://localhost:5050"; //"https://cex-sr.onrender.com"; //
+
   useEffect(() => {
+    // localStorage.setItem("serverURL", JSON.stringify({ serverURL }));
+
     // Fetch the user email and token from local storage
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -43,8 +46,6 @@ function App() {
     <div className="App">
       {loggedIn ? (
         <Home
-          email={email}
-          address={address}
           loggedIn={loggedIn}
           setLoggedIn={setLoggedIn}
           serverURL={serverURL}

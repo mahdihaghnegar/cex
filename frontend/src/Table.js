@@ -3,13 +3,11 @@ import React, { useState } from "react";
 import "./Table.css";
 import Withdraw from "./Withdraw";
 const Table = (props) => {
-  const {
-    address,
-    serverURL,
-    holesky,
-    usdt, // setToken, setMaxAmount
-  } = props;
+  const { serverURL, holesky, usdt } = props;
   //const navigate = useNavigate();
+  // Fetch the user email and token from local storage
+  //const user = JSON.parse(localStorage.getItem("user"));
+
   const [viewTable, setViewTable] = useState(true);
   const [token, setToken] = useState("");
   const [maxAmount, setMaxAmount] = useState(0);
@@ -79,7 +77,6 @@ const Table = (props) => {
   ) : (
     <Withdraw
       token={token}
-      address={address}
       maxAmount={maxAmount}
       serverURL={serverURL}
       setViewTable={setViewTable}

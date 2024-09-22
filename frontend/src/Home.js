@@ -2,21 +2,16 @@ import { React, useState, useEffect } from "react";
 //import { useNavigate } from "react-router-dom";
 import Table from "./Table";
 const Home = (props) => {
-  const {
-    loggedIn,
-    email,
-    address,
-    serverURL,
-    //   setToken, setMaxAmount
-  } = props;
+  //const { loggedIn, serverURL } = props;
   const [balance, setBalance] = useState(0);
   const [usdtBalance, setusdtBalance] = useState(0);
   //const navigate = useNavigate();
-
+  // Fetch the user email and token from local storage
+  const user = JSON.parse(localStorage.getItem("user"));
   useEffect(() => {
     const intervalId = setInterval(() => {
       try {
-        if (loggedIn && email !== null) checkEmailBalance();
+        if (props.loggedIn && user.email !== null) checkEmailBalance();
       } catch {
         console.log("connection error");
       }
@@ -27,7 +22,7 @@ const Home = (props) => {
   }, []);
 
   const onButtonClick = () => {
-    if (loggedIn) {
+    if (props.loggedIn) {
       localStorage.removeItem("user");
       props.setLoggedIn(false);
     } //else {navigate("/login");}
@@ -35,12 +30,12 @@ const Home = (props) => {
 
   const checkEmailBalance = () => {
     try {
-      fetch(`${serverURL}/balance`, {
+      fetch(`${props.serverURL}/balance`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: user.email }),
       })
         .then((r) => r.json())
         .then((r) => {
@@ -64,19 +59,18 @@ const Home = (props) => {
         className={"inputButton"}
         type="button"
         onClick={onButtonClick}
-        value={loggedIn ? "خروج" : "ورود"}
+        value={props.loggedIn ? "خروج" : "ورود"}
       />
 
       <div className="mainContainer">
         <div className={"titleContainer"}>
           <div>صرافی غیر متمرکز ایکس!</div>
           <h5>
-            {email} <br /> {address}
+            {user.email} <br /> {user.address}
           </h5>
         </div>
         <Table
-          address={address}
-          serverURL={serverURL}
+          serverURL={props.serverURL}
           holesky={balance}
           usdt={usdtBalance}
         />
