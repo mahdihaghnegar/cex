@@ -11,12 +11,20 @@ import balances from "./routes/balance.js";
 //import balanceSubscription from "./balanceSubscription.js";
 import balanceBlock from "./balanceBlock.js";
 
+import { config } from "dotenv";
+config();
+console.log(process.env);
+
+const apiKey = process.env.API_KEY;
+console.log("API Key:", apiKey);
 const PORT = process.env.PORT || 5050;
+const Front_URL = process.env.Front_URL || "http://localhost:3000";
+
 const app = express();
 
 // middleware
 const corsOptions = {
-  origin: "https://cex-fr.onrender.com", // "http://localhost:3000", //
+  origin: Front_URL,
 };
 app.use(express.json());
 app.use(cors(corsOptions));
