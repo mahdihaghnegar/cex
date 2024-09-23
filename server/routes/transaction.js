@@ -64,7 +64,13 @@ trRouter.post("/", async (req, res) => {
 
   const { toaddress, amount, token } = req.body;
 
-  //import from address by email saved in jwt-token
+  //import user by email saved in jwt-token
+  const email = verify.email;
+  let collection = await db.collection("users");
+  let user = await collection.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User Not found" });
+
+  //transaction
 
   if (validateAddress(toaddress)) {
     return res.status(200).json({ message: "success" });

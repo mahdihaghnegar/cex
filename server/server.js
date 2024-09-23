@@ -11,12 +11,13 @@ import balances from "./routes/balance.js";
 //import balanceSubscription from "./balanceSubscription.js";
 import balanceBlock from "./balanceBlock.js";
 
-import { config } from "dotenv";
+/*import { config } from "dotenv";
 config();
 console.log(process.env);
 
 const apiKey = process.env.API_KEY;
-console.log("API Key:", apiKey);
+console.log("API Key:", apiKey);*/
+
 const PORT = process.env.PORT || 5050;
 const Front_URL = process.env.Front_URL || "http://localhost:3000";
 

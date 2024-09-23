@@ -12,7 +12,7 @@ function App() {
 
   //const [address, setAddress] = useState("");
 
-  const serverURL = "https://cex-sr.onrender.com"; //"http://localhost:5050"; //
+  const serverURL = "http://localhost:5050"; // "https://cex-sr.onrender.com"; //
 
   useEffect(() => {
     // localStorage.setItem("serverURL", JSON.stringify({ serverURL }));
