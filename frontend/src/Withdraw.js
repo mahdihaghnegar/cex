@@ -7,6 +7,7 @@ const Withdraw = (props) => {
   const [toaddress, setToAddress] = useState("");
   const [amountError, setAmountError] = useState("");
   const [toError, setToError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch the user email and token from local storage
   const user = JSON.parse(localStorage.getItem("user"));
@@ -53,6 +54,7 @@ const Withdraw = (props) => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
+
     // Handle form submission logic here
     console.log("Amount:", amount);
     console.log("From Address:", user.address);
@@ -77,11 +79,13 @@ const Withdraw = (props) => {
         setToError("آدرس موجود نمی باشد");
         return;
       } else {
-        setToError("go");
+        //setToError("go");
+        setIsLoading(true);
         transaction((success) => {
           if (success) setViewTable(true);
           else {
             setToError("تراکنش ناموفق! دوباره سعی کنید!");
+            setIsLoading(false);
             return;
           }
         });
@@ -89,7 +93,9 @@ const Withdraw = (props) => {
     });
   };
 
-  return (
+  return isLoading ? (
+    <p className="errorLabel">Please wait...</p>
+  ) : (
     <div className="custom-page-container">
       <form onSubmit={handleSubmit}>
         <h2> انتقال {token}</h2>
