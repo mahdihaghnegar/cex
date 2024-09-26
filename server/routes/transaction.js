@@ -13,17 +13,25 @@ const trRouter = express.Router();
 //const JWTSecretKey = process.env.JWTSecretKey || "";
 const JWTSecretKey = "dsfdsfsdfdsvcsvdfgefg";
 import Web3 from "web3";
-import e from "express";
+import contract from "../contract/Cexusdt.json" assert { type: "json" };
 
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
 const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 const cexPR =
   "910c0cea2a4f20d7cb5b1f51391e2b031ce977e73637f84516e0e0a0fbffa3bd";
+//const usdtTokenAddress = "0xF23c254290a40b6a7744b7951cED14D76bE39881";
+const usdtTokenAddress = contract.address;
+const ERC20ABI = contract.abi;
+
+//https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
+
 // Set up the RPC connection to Test-BNB
 const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
-const web3Provider = new Web3.providers.HttpProvider(rpcUrl);
+const web3Provider = new Web3.providers.HttpProvider(rpcUrl); //http
+
 const web3 = new Web3(web3Provider);
+const tokenContract = new web3.eth.Contract(ERC20ABI, usdtTokenAddress);
 // Function to validate Ethereum address
 
 const verifyJWT = (authToken) => {
@@ -115,7 +123,24 @@ async function createTransaction(
         return callback(false);
       }
     );
-  } else return callback(false);
+  } else if (tokenType === "usdt") {
+    //transaction for usdt
+    await transferUsdtToken(user, amount, toAddress).then(
+      async (bal) => {
+        //update user.balance , user. usdtbalance:
+        const usdtbalance = BigInt(user.usdtbalance) - amount;
+        await collection.updateOne(
+          { _id: user._id },
+          { $set: { balance: bal, usdtbalance: usdtbalance } }
+        );
+        return callback(true);
+      },
+      (terror) => {
+        console.error("tx: ", terror);
+        return callback(false);
+      }
+    );
+  }
 }
 
 function createTransactionETHfromCEX(user, balance, toAddress) {
@@ -157,12 +182,74 @@ function createTransactionETHfromCEX(user, balance, toAddress) {
           "Transaction created! createTransactionETHfromCEX Hash: ",
           txHash.blockNumber
         );
-
+        newBalance =
+          BigInt(user.balance) -
+          balance -
+          txHash.effectiveGasPrice * txHash.gasUsed;
         resolve(newBalance);
       }
     } catch (error) {
       //console.error("Error creating transaction:", error);
       reject(new Error("Error createTransactionETHfromCEX: \n", error));
+    }
+  });
+}
+
+async function transferUsdtToken(user, balance, toAddress) {
+  return new Promise(async function (resolve, reject) {
+    try {
+      const tokenAddress = usdtTokenAddress; // Replace with the token contract address
+      //const fromAddress = "0x..."; // Replace with the address that owns the token balance
+      //const fromAddress = cexAddress; // Replace with the address that will receive the token balance
+      //const amount = web3.utils.toWei("1.0", "ether"); // Replace with the amount of tokens to transfer (in wei)
+
+      //const privateKey = "0x..."; // Replace with the private key of the fromAddress account
+
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = 90000n; // web3.utils.toHex(90000);
+      const price = gasPrice * gasLimit;
+      let newBalance = BigInt(user.balance) - price; //gasEstimate; // gasPrice * BigInt(mul); //10 ** 14; //
+      if (newBalance < 0n) {
+        reject(
+          new Error(
+            "less balance " + balance + " for gasEstimate " + gasEstimate //  gasPrice +
+          )
+        );
+      }
+
+      const tdata = tokenContract.methods
+        .transfer(toAddress, balance)
+        .encodeABI();
+      let count = await web3.eth.getTransactionCount(cexAddress);
+
+      const nonce = web3.utils.toHex(count);
+      const txData = {
+        //  nonce: nonce,
+        from: cexAddress,
+        to: tokenAddress,
+        value: "0x0", // Set to 0 since we're transferring a token
+        gas: web3.utils.toHex(gasLimit), //gasLimit, // "0x5208", // Replace with the gas limit
+        gasPrice: gasPrice, // "0x186a0", // Replace with the gas price
+        data: tdata,
+      };
+
+      const signedTx = await web3.eth.accounts.signTransaction(txData, cexPR);
+      const txHash = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+
+      console.log(
+        "Transaction Token created! transferUsdtToken Hash:",
+        txHash.blockNumber
+      );
+      newBalance =
+        BigInt(user.balance) - txHash.effectiveGasPrice * txHash.gasUsed;
+      resolve(newBalance);
+      // return true;
+    } catch (error) {
+      console.error("Error transferUsdtToken:", error);
+      //return false;
+      reject(new Error("Error transferUsdtToken:", error));
     }
   });
 }
