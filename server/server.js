@@ -1,22 +1,12 @@
 import express from "express";
 import cors from "cors";
-//import records from "./routes/record.js";
+import auths from "./routes/auth.js";
+import balances from "./routes/balance.js";
+import checkAccounts from "./routes/check-account.js";
 import transactions from "./routes/transaction.js";
 import users from "./routes/user.js";
-import auths from "./routes/auth.js";
 import verifys from "./routes/verify.js";
-import checkAccounts from "./routes/check-account.js";
-import balances from "./routes/balance.js";
-//import loopUpdate from "./balanceServer.js";
-//import balanceSubscription from "./balanceSubscription.js";
-import balanceBlock from "./balanceBlock.js";
-
-/*import { config } from "dotenv";
-config();
-console.log(process.env);
-
-const apiKey = process.env.API_KEY;
-console.log("API Key:", apiKey);*/
+import balanceBlock from "./balanceBlock.js"; //deposit
 
 const PORT = process.env.PORT || 5050;
 const Front_URL = process.env.Front_URL || "http://localhost:3000";
@@ -36,14 +26,9 @@ app.use("/verify", verifys);
 app.use("/check-account", checkAccounts);
 app.use("/transaction", transactions);
 
-/*setInterval(() => {
-  loopUpdate(null);
-}, 30000);*/
-//balanceSubscription();
-
 setInterval(() => {
   balanceBlock();
-}, 50000); //5*13*1000ms= 100000
+}, 50000); //5*1000ms= 50000
 
 // Basic home route for the API
 app.get("/", (_req, res) => {
