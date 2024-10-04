@@ -1,4 +1,7 @@
 import express from "express";
+import swaggerUI from "swagger-ui-express";
+import swaggerSpec from "./swagger.js";
+
 import cors from "cors";
 import auths from "./routes/auth.js";
 import balances from "./routes/balance.js";
@@ -13,6 +16,7 @@ const Front_URL = process.env.Front_URL || "http://localhost:3000";
 
 const app = express();
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // middleware
 const corsOptions = {
   origin: Front_URL,

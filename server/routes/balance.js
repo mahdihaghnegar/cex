@@ -1,6 +1,7 @@
 import express from "express";
+import db from "../db/connection.js";
 
-import loopUpdate from "../balanceServer.js";
+//import loopUpdate from "../balanceServer.js";
 
 // router is an instance of the express router.
 // We use it to define our routes.
@@ -13,9 +14,17 @@ const routerBalance = express.Router();
 // Set up the RPC connection to Test-BNB
 //const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 
+async function getUser(email) {
+  let collection = await db.collection("users");
+  let user = await collection.findOne({ email });
+  //let changedBalance = false;
+  if (user === null) return -1;
+  return user;
+}
+
 routerBalance.post("/", async (req, res) => {
   const { email } = req.body;
-  const user = await loopUpdate(email);
+  const user = await getUser(email);
   if (user < 0) {
     return res.status(401).json({ status: "invalid user", message: "error" });
   }
