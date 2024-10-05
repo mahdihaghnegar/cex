@@ -7,7 +7,6 @@ import auths from "./routes/auth.js";
 import balances from "./routes/balance.js";
 import checkAccounts from "./routes/check-account.js";
 import transactions from "./routes/transaction.js";
-//import users from "./routes/user.js";
 import verifys from "./routes/verify.js";
 import balanceBlock from "./balanceBlock.js"; //deposit
 
@@ -17,14 +16,18 @@ const Front_URL = process.env.Front_URL || "http://localhost:3000";
 const app = express();
 
 // middleware
-const corsOptions = {
-  origin: Front_URL,
-};
+
 app.use(express.json());
 //remove cors option
-//app.use(cors(corsOptions));
+/*const corsOptions = {
+  origin: Front_URL,
+};
+app.use(cors(corsOptions));*/
+
+// Enable CORS for all routes
+app.use(cors());
+
 app.use("/balance", balances);
-//app.use("/user", users);
 app.use("/auth", auths);
 app.use("/verify", verifys);
 app.use("/check-account", checkAccounts);

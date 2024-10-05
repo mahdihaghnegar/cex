@@ -75,7 +75,7 @@ const verifyJWT = (authToken) => {
  * /transaction:
  *   get:
  *     summary: Check if an Ethereum address is valid
- *     tags: [Withdraw Transactions]
+ *     tags: [ Ethereum address]
  *     parameters:
  *       - in: query
  *         name: address
@@ -102,8 +102,8 @@ const verifyJWT = (authToken) => {
  * @swagger
  * /transaction:
  *   post:
- *     summary: Create a transaction
- *     tags: [Transaction]
+ *     summary: Create Withdraw transaction
+ *     tags: [Withdraw Transactions]
  *     parameters:
  *       - in: header
  *         name: jwt-token
