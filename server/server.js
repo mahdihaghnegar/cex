@@ -21,7 +21,8 @@ const corsOptions = {
   origin: Front_URL,
 };
 app.use(express.json());
-app.use(cors(corsOptions));
+//remove cors option
+//app.use(cors(corsOptions));
 app.use("/balance", balances);
 app.use("/user", users);
 app.use("/auth", auths);
