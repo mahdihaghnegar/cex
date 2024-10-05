@@ -7,7 +7,7 @@ import auths from "./routes/auth.js";
 import balances from "./routes/balance.js";
 import checkAccounts from "./routes/check-account.js";
 import transactions from "./routes/transaction.js";
-import users from "./routes/user.js";
+//import users from "./routes/user.js";
 import verifys from "./routes/verify.js";
 import balanceBlock from "./balanceBlock.js"; //deposit
 
@@ -24,7 +24,7 @@ app.use(express.json());
 //remove cors option
 //app.use(cors(corsOptions));
 app.use("/balance", balances);
-app.use("/user", users);
+//app.use("/user", users);
 app.use("/auth", auths);
 app.use("/verify", verifys);
 app.use("/check-account", checkAccounts);

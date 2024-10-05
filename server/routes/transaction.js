@@ -6,25 +6,22 @@ import db from "../db/connection.js";
 // This help convert the id from string to ObjectId for the _id.
 import { ObjectId } from "mongodb";
 
-// router is an instance of the express router.
-// We use it to define our routes.
-// The router will be added as a middleware and will take control of requests starting with path /record.
 const trRouter = express.Router();
-//const JWTSecretKey = process.env.JWTSecretKey || "";
-const JWTSecretKey = "dsfdsfsdfdsvcsvdfgefg";
+const JWTSecretKey = process.env.JWTSecretKey ||  "dsfdsfsdfdsvcsvdfgefg";
+
 import Web3 from "web3";
 import contract from "../contract/Cexusdt.json" with  { type: "json" };
 
-//https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
+
 
 const cexAddress = "0xF81DbdcE32f379be600939d102069E834B3d9733";
 const cexPR =
   "910c0cea2a4f20d7cb5b1f51391e2b031ce977e73637f84516e0e0a0fbffa3bd";
-//const usdtTokenAddress = "0xF23c254290a40b6a7744b7951cED14D76bE39881";
+
 const usdtTokenAddress = contract.address;
 const ERC20ABI = contract.abi;
 
-//https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
+
 
 // Set up the RPC connection to Test-BNB
 const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
@@ -44,12 +41,114 @@ const verifyJWT = (authToken) => {
   }
 };
 
-const validateAddress = (address) => {
-  return web3.utils.isAddress(address);
-};
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     VerifyResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: The message indicating success or error
+ *     TransactionRequest:
+ *       type: object
+ *       required:
+ *         - toaddress
+ *         - amount
+ *         - token
+ *       properties:
+ *         toaddress:
+ *           type: string
+ *           description: The recipient's Ethereum address
+ *         amount:
+ *           type: string
+ *           description: The amount to transfer
+ *         token:
+ *           type: string
+ *           description: The token to transfer
+ */
+
+/**
+ * @swagger
+ * /transaction:
+ *   get:
+ *     summary: Check if an Ethereum address is valid
+ *     tags: [Withdraw Transactions]
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The Ethereum address to validate
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyResponse'
+ *       400:
+ *         description: Invalid Ethereum address
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyResponse'
+ */
+
+/**
+ * @swagger
+ * /transaction:
+ *   post:
+ *     summary: Create a transaction
+ *     tags: [Transaction]
+ *     parameters:
+ *       - in: header
+ *         name: jwt-token
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The JWT token for authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TransactionRequest'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyResponse'
+ *       400:
+ *         description: Invalid Ethereum address
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyResponse'
+ *       403:
+ *         description: JWT is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyResponse'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyResponse'
+ */
+
+
+
 // GET endpoint to check Ethereum address
 trRouter.get("/", (req, res) => {
-  //const { address } = req.body;
+  
   const address = req.query.address; // Assuming address is passed as a query parameter
 
   if (!address) {
@@ -62,6 +161,9 @@ trRouter.get("/", (req, res) => {
     return res.status(400).json({ message: "Invalid Ethereum address" });
   }
 });
+const validateAddress = (address) => {
+  return web3.utils.isAddress(address);
+};
 
 trRouter.post("/", async (req, res) => {
   const tokenHeaderKey = "jwt-token";
@@ -70,7 +172,7 @@ trRouter.post("/", async (req, res) => {
   const verify = verifyJWT(authToken);
 
   if (!verify) {
-    return res.status(403).json({ message: "jwt  is required" });
+    return res.status(403).json({ message: "jwt is required" });
   }
 
   const { toaddress, amount, token } = req.body;
