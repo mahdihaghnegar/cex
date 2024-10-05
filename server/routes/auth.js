@@ -14,23 +14,6 @@ import Web3 from "web3";
 // The router will be added as a middleware and will take control of requests starting with path /record.
 const routerAuth = express.Router();
 
-// This section will help you create a new record.
-/*router.post("/", async (req, res) => {
-  try {
-    let newDocument = {
-      name: req.body.name,
-      position: req.body.position,
-      level: req.body.level,
-    };
-    let collection = await db.collection("records");
-    let result = await collection.insertOne(newDocument);
-    res.send(result).status(204);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error adding record");
-  }
-});*/
-
 // Set up the RPC connection to Test-BNB
 const rpcUrl = "https://holesky.infura.io/v3/1777f3bd097440149132c56fd419752d";
 
@@ -41,28 +24,25 @@ async function createWallet() {
   //console.log("f");
   const wallet = web3.eth.accounts.create();
   console.log(`New wallet address: ${wallet.address}`);
-  /*web3.eth.getBlockNumber().then((result) => {
-    console.log("Latest Ethereum Block is ", result);
-  });*/
+
   return wallet;
 }
-
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get a list of users
+ *     description: Retrieve a list of users from the database.
+ *     responses:
+ *       200:
+ *         description: Successful response with a list of users.
+ */
 routerAuth.post("/", async (req, res) => {
   const { email, password } = req.body;
 
-  // Look up the user entry in the database
-  /*const user = db
-    .get("users")
-    .value()
-    .filter((user) => email === user.email);*/
-
   let collection = await db.collection("users");
-  //let query = { _id: new ObjectId(req.params.id) };
-  //let query = { email: new ObjectId(req.params.email) };
-  let user = await collection.findOne({ email });
 
-  //if (!result) res.send("Not found").status(404);
-  //else res.send(result).status(200);
+  let user = await collection.findOne({ email });
 
   // If found, compare the hashed passwords and generate the JWT token for the user
   //const JWTSecretKey = process.env.JWTSecretKey || "";
@@ -71,7 +51,6 @@ routerAuth.post("/", async (req, res) => {
     if (user === null) {
       bcrypt.hash(password, 10, async function (_err, hash) {
         console.log({ email, password: hash });
-        //db.get("users").push({ email, password: hash }).write();
 
         const wallet = await createWallet();
         let newUser = {
@@ -83,7 +62,6 @@ routerAuth.post("/", async (req, res) => {
         };
 
         let result = await collection.insertOne(newUser);
-        // res.send(result).status(204);
 
         let loginData = {
           email,

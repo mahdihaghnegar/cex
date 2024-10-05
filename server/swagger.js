@@ -1,7 +1,7 @@
-import swaggerJSDoc from "swagger-jsdoc";
+import swaggerJsdoc from "swagger-jsdoc";
 
-const options = {
-  definition: {
+const swaggerOptions = {
+  swaggerDefinition: {
     openapi: "3.0.0",
     info: {
       title: "Centralized Exchange API ",
@@ -9,11 +9,16 @@ const options = {
       description:
         "API documentation for Centralized Exchange Node.js application",
     },
+    servers: [
+      {
+        url: "http://localhost:5050",
+      },
+    ],
   },
   apis: ["./routes/*.js"], // Path to the API routes
 };
-const swaggerSpec = swaggerJSDoc(options);
-export default swaggerSpec;
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+export default swaggerDocs;
 
 /*
 https://medium.com/@selieshjksofficial/embracing-swagger-in-node-js-a-practical-implementation-guide-05f865c90b8d

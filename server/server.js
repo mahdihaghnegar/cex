@@ -1,6 +1,6 @@
 import express from "express";
-import swaggerUI from "swagger-ui-express";
-import swaggerSpec from "./swagger.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocs from "./swagger.js";
 
 import cors from "cors";
 import auths from "./routes/auth.js";
@@ -16,7 +16,6 @@ const Front_URL = process.env.Front_URL || "http://localhost:3000";
 
 const app = express();
 
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 // middleware
 const corsOptions = {
   origin: Front_URL,
@@ -41,6 +40,7 @@ app.get("/", (_req, res) => {
   );
 });
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // start the Express server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
