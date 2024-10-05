@@ -1,33 +1,78 @@
 import express from "express";
 
-// This will help us connect to the database
 import db from "../db/connection.js";
 
-// This help convert the id from string to ObjectId for the _id.
-//import { ObjectId } from "mongodb";
-
-// router is an instance of the express router.
-// We use it to define our routes.
-// The router will be added as a middleware and will take control of requests starting with path /record.
 const checkAccount = express.Router();
 
-// The verify endpoint that checks if a given JWT token is valid
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *       properties:
+ *         email:
+ *           type: string
+ *           description: The user's email
+ */
+
+/**
+ * @swagger
+ * /check-account:
+ *   post:
+ *     summary: check if a email exists
+ *     tags: [check-account]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: The user's email
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 userExists:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+
+/**
+ * POST /check-account
+ * Endpoint to check if a user exists in the database based on the provided email.
+ * @param {string} email - The email of the user to verify.
+ * @returns {object} - A JSON object indicating whether the user exists.
+ */
 checkAccount.post("/", async (req, res) => {
   let user = null;
   try {
     const { email } = req.body;
 
-    console.log(req.body);
-
-    // const user = db
-    //   .get('users')
-    //   .value()
-    //   .filter((user) => email === user.email)
+    // Get the users collection from the database
     let collection = await db.collection("users");
 
+    // Find a user with the provided email
     user = await collection.findOne({ email });
-
-    console.log(user);
   } catch (error) {
     console.error(error);
   }
