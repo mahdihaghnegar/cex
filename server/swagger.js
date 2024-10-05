@@ -12,6 +12,11 @@ const swaggerOptions = {
     servers: [
       {
         url: "http://localhost:5050",
+        description: "Local server",
+      },
+      {
+        url: "https://cex-sr.onrender.com",
+        description: "Production server",
       },
     ],
   },
