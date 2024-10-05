@@ -1,8 +1,8 @@
 import swaggerJsdoc from "swagger-jsdoc";
 
 const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
+  definition: {
+    openapi: "3.0.3",
     info: {
       title: "Centralized Exchange API ",
       version: "1.0.0",
@@ -15,7 +15,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./routes/*.js"], // Path to the API routes
+  apis: ["server/routes/*.js"], // Path to the API routes : need start from server
 };
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 export default swaggerDocs;

@@ -28,14 +28,38 @@ async function createWallet() {
   return wallet;
 }
 /**
- * @swagger
- * /users:
- *   get:
- *     summary: Get a list of users
- *     description: Retrieve a list of users from the database.
+ * @openapi
+ * /auth:
+ *   post:
+ *     summary: Create a new user or authenticate an existing user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Successful response with a list of users.
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 address:
+ *                   type: string
+ *       401:
+ *         description: Invalid password
  */
 routerAuth.post("/", async (req, res) => {
   const { email, password } = req.body;
