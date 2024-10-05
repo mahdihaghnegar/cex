@@ -20,7 +20,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./server/routes/*.js"], // Path to the API routes : need start from server
+  apis: ["./server/routes/*.js", "./routes/*.js"], // Path to the API routes : need start from server
 };
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 export default swaggerDocs;
