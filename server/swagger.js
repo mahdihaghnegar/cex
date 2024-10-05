@@ -4,7 +4,7 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Centralized Exchange API Title",
+      title: "Centralized Exchange API ",
       version: "1.0.0",
       description:
         "API documentation for Centralized Exchange Node.js application",

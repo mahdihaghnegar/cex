@@ -16,7 +16,7 @@ const Front_URL = process.env.Front_URL || "http://localhost:3000";
 
 const app = express();
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 // middleware
 const corsOptions = {
   origin: Front_URL,

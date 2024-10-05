@@ -2,7 +2,7 @@
 import db from "./db/connection.js";
 
 import Web3 from "web3";
-import contract from "./contract/Cexusdt.json" assert { type: "json" };
+import contract from "./contract/Cexusdt.json" with { type: "json" };
 
 //https://holesky.beaconcha.in/address/0xc263C4801Ae2835b79C22a381B094947bD07c132
 
